@@ -1,3 +1,4 @@
+// models/Land.js
 const mongoose = require('mongoose');
 
 const landSchema = new mongoose.Schema({
@@ -7,6 +8,7 @@ const landSchema = new mongoose.Schema({
     location: { type: String, required: true },
     area: { type: Number, required: true }, // in square feet
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    aadharId: { type: String, required: true }, // New field for owner's Aadhar ID
     status: { 
         type: String, 
         enum: ['owned', 'pending_sale', 'available', 'pending', 'sold'], 
@@ -25,4 +27,4 @@ const landSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Land', landSchema); 
+module.exports = mongoose.model('Land', landSchema);

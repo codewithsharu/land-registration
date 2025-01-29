@@ -1,19 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Land Marketplace</title>
+    <link rel="stylesheet" href="/styles/main.css"> <!-- Link to external CSS for styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+        .nav-links {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav-links a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: #0056b3;
+        }
+        h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+        p {
+            color: #555;
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to Land Marketplace</h1>
-    
-    <div>
-        <a href="/login">Login</a>
-        <a href="/register">Register</a>
-    </div>
+    <div class="container">
+        <h1>Welcome to Land Marketplace</h1>
+        
+        <div class="nav-links">
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        </div>
 
-    <div>
-        <h2>About Us</h2>
-        <p>Welcome to the Land Marketplace platform where you can buy and sell land properties securely.</p>
+        <div>
+            <h2>About Us</h2>
+            <p>Welcome to the Land Marketplace platform where you can buy and sell land properties securely.</p>
+        </div>
     </div>
 </body>
 </html> 

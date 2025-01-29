@@ -223,10 +223,11 @@ app.get('/admin/dashboard', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// Render all lands
+// Fetch all lands
 app.get('/lands', async (req, res) => {
     try {
-        const allLands = await Land.find().populate('owner'); // Fetch all lands
+        const userAadharId = req.session.user.aadharId; // Get Aadhar ID from session
+        const allLands = await Land.find({ aadharId: { $ne: userAadharId } }).populate('owner'); // Exclude lands owned by the user
         res.render('lands', { lands: allLands }); // Render the lands.ejs template with the lands data
     } catch (error) {
         console.error('Error fetching all lands:', error);
@@ -258,15 +259,16 @@ app.post('/land/add', upload.fields([{ name: 'landPicture' }, { name: 'propertyD
             location,
             area,
             owner: req.session.user.userId,
+            aadharId: req.session.user.aadharId,
             status: 'available',
             documents: {
-                landPicture: req.files['landPicture'][0].filename, // Save the filename
-                propertyDocuments: req.files['propertyDocuments'][0].filename // Save the filename
+                landPicture: req.files['landPicture'][0].filename,
+                propertyDocuments: req.files['propertyDocuments'][0].filename
             }
         });
 
         await newLand.save();
-        res.redirect('/dashboard'); // Redirect to the dashboard after adding
+        res.redirect('/dashboard');
     } catch (error) {
         console.error('Error adding land:', error);
         res.status(500).send('Error adding land');

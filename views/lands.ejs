@@ -1,36 +1,164 @@
-<!-- views/lands.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Lands</title>
+    <title>All Lands - Land Marketplace</title>
+    <link rel="stylesheet" href="/styles/main.css"> <!-- Link to external CSS for styling -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for interactivity -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .land-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            width: 250px; /* Increased width for better text space */
+            display: inline-block;
+            vertical-align: top;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff; /* White background for cards */
+            cursor: pointer; /* Indicate that the card is clickable */
+            transition: transform 0.2s; /* Smooth scaling effect */
+        }
+        .land-card:hover {
+            transform: scale(1.02); /* Slightly enlarge card on hover */
+        }
+        .land-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 12px; /* Space between image and text */
+        }
+        .land-title {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+        .land-price {
+            font-size: 1.2em;
+            color: #007bff; /* Highlight price with a different color */
+            margin: 10px 0;
+        }
+        .view-docs-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+        .view-docs-btn:hover {
+            background-color: #0056b3;
+        }
+        h2 {
+            text-align: left; /* Align section title to the left */
+        }
+        /* Popup styles */
+        .popup {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .popup-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <h1>All Lands</h1>
-    <ul>
-        <% lands.forEach(land => { %>
-            <li>
-                <h2><%= land.title %></h2>
-                <p>Description: <%= land.description %></p>
-                <p>Price: <%= land.price %></p>
-                <p>Location: <%= land.location %></p>
-                <p>Owner: <%= land.owner.name %></p>
-                
-                <% if (land.documents && land.documents.landPicture) { %>
-                    <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" style="max-width: 200px;"/>
+    <nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+            <div style="color: white; font-size: 1.5em;">
+                <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
+            </div>
+            <div style="display: flex; gap: 1em;">
+                <% if (locals.user && locals.user.role) { %>
+                    <% if (user.role === 'admin') { %>
+                        <a href="/admin/dashboard" style="color: white; text-decoration: none;">Admin Dashboard</a>
+                    <% } else { %>
+                        <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
+                    <% } %>
+                    <span style="color: white;">Welcome, <%= user.name %></span>
+                    <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
+                <% } else { %>
+                    <a href="/dashboard" style="color: white; text-decoration: none;">dashboard</a>
+                    <!-- <a href="/register" style="color: white; text-decoration: none;">Register</a> -->
                 <% } %>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <section class="land-list">
+            <h2>Available Lands</h2>
+            <div>
+                <% lands.forEach(land => { %>
+                    <div class="land-card" onclick="showPopup('<%= land.title %>', '<%= land.description %>', '<%= land.price.toLocaleString() %>', '<%= land.location %>', '<%= land.owner.name %>', '<%= land.documents.propertyDocuments ? '/uploads/' + land.documents.propertyDocuments : '' %>')">
+                        <% if (land.documents && land.documents.landPicture) { %>
+                            <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" class="land-image"/>
+                        <% } %>
+                        <h3 class="land-title"><%= land.title %></h3>
+                        <p class="land-price">$<%= land.price.toLocaleString() %></p>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+    </main>
 
-                <% if (land.documents && land.documents.propertyDocuments) { %>
-                    <h3>Documents:</h3>
-                    <ul>
-                        <li>
-                            <a href="/uploads/<%= land.documents.propertyDocuments %>" target="_blank">View Document</a>
-                        </li>
-                    </ul>
-                <% } %>
-            </li>
-        <% }) %>
-    </ul>
+    <!-- Popup for land details -->
+    <div class="popup" id="landPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closePopup()">&times;</span>
+            <h3 id="popupTitle"></h3>
+            <p><strong>Description:</strong> <span id="popupDescription"></span></p>
+            <p><strong>Price:</strong> $<span id="popupPrice"></span></p>
+            <p><strong>Location:</strong> <span id="popupLocation"></span></p>
+            <p><strong>Owner:</strong> <span id="popupOwner"></span></p>
+            <div id="popupDocs"></div>
+        </div>
+    </div>
+
+    <footer style=" width: 100%; background-color: #333; bottom: 0; position: fixed; color: white; text-align: center; ">
+        <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function showPopup(title, description, price, location, owner, docs) {
+            document.getElementById('popupTitle').innerText = title;
+            document.getElementById('popupDescription').innerText = description;
+            document.getElementById('popupPrice').innerText = price;
+            document.getElementById('popupLocation').innerText = location;
+            document.getElementById('popupOwner').innerText = owner;
+            document.getElementById('popupDocs').innerHTML = docs ? '<a href="' + docs + '" target="_blank" class="view-docs-btn">View Document</a>' : '';
+            document.getElementById('landPopup').style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('landPopup').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
