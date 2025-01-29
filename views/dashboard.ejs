@@ -1,0 +1,53 @@
+<%- include('includes/header', {title: 'User Dashboard'}) %>
+
+<h2>My Lands</h2>
+
+<!-- Form to Add New Land -->
+<h3>Add New Land</h3>
+<form action="/land/add" method="POST" enctype="multipart/form-data">
+    <input type="text" name="title" placeholder="Title" required><br>
+    <textarea name="description" placeholder="Description" required></textarea><br>
+    <input type="number" name="price" placeholder="Price" required><br>
+    <input type="text" name="location" placeholder="Location" required><br>
+    <input type="number" name="area" placeholder="Area in sq ft" required><br>
+    <label>Land Picture:</label><br>
+    <input type="file" name="landPicture" accept="image/*" required><br>
+    <label>Property Documents:</label><br>
+    <input type="file" name="propertyDocuments" accept="image/*,.pdf" required><br>
+    <button type="submit">Add Land</button>
+</form>
+
+<!-- Display User's Lands -->
+<% if (myLands && myLands.length > 0) { %>
+    <h3>Your Lands</h3>
+    <% myLands.forEach(function(land) { %>
+        <div class="land-item">
+            <h4><%= land.title %></h4>
+            <% if (land.documents && land.documents.landPicture) { %>
+                <img src="/uploads/<%= land.documents.landPicture %>" alt="Land Picture" style="max-width: 200px; height: auto;"><br>
+            <% } %>
+            <p>Description: <%= land.description %></p>
+            <p>Price: <%= land.price %></p>
+            <p>Location: <%= land.location %></p>
+            <p>Area: <%= land.area %> sq ft</p>
+            <p>Status: <%= land.status %></p>
+            <p>Owner Aadhar ID: <%= land.owner.aadharId %></p>
+            <div class="button-group">
+                <% if (land.status === 'owned') { %>
+                    <form action="/land/request-sell/<%= land._id %>" method="POST">
+                        <button type="submit" class="btn">Request to Sell</button>
+                    </form>
+                <% } else if (land.status === 'pending_sale') { %>
+                    <p>Waiting for admin approval to sell</p>
+                <% } %>
+                <% if (land.documents && land.documents.propertyDocuments) { %>
+                    <a href="/uploads/<%= land.documents.propertyDocuments %>" class="btn" target="_blank">View Documents</a>
+                <% } %>
+            </div>
+        </div>
+    <% }); %>
+<% } else { %>
+    <p>No lands added yet.</p>
+<% } %>
+
+<%- include('includes/footer') %> 

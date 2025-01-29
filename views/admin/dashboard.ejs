@@ -1,0 +1,52 @@
+<%- include('../includes/header', {title: 'Admin Dashboard'}) %>
+
+<div class="approval-section">
+    <h2>Pending Users</h2>
+    <% if (pendingUsers && pendingUsers.length > 0) { %>
+        <% pendingUsers.forEach(function(user) { %>
+            <div class="land-item">
+                <h3><%= user.name %></h3>
+                <p>Email: <%= user.email %></p>
+                <p>Aadhar ID: <%= user.aadharId %></p>
+                <p>PAN: <%= user.panNumber %></p>
+                <div class="button-group">
+                    <form action="/admin/approve-user/<%= user._id %>" method="POST">
+                        <button type="submit" class="btn">Approve User</button>
+                    </form>
+                    <% if (user.documents) { %>
+                        <a href="/uploads/<%= user.documents.aadharCard %>" class="btn" target="_blank">View Aadhar Card</a>
+                        <a href="/uploads/<%= user.documents.panCard %>" class="btn" target="_blank">View PAN Card</a>
+                    <% } %>
+                </div>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <p>No pending users</p>
+    <% } %>
+</div>
+
+<div class="approval-section">
+    <h2>Pending Land Sale Requests</h2>
+    <% if (pendingSales && pendingSales.length > 0) { %>
+        <% pendingSales.forEach(function(land) { %>
+            <div class="land-item">
+                <h3><%= land.title %></h3>
+                <% if (land.documents && land.documents.landPicture) { %>
+                    <img src="/uploads/<%= land.documents.landPicture.split('/').pop() %>" 
+                         alt="Land Picture" 
+                         class="land-image">
+                <% } %>
+                <p>Price: <%= land.price %></p>
+                <p>Location: <%= land.location %></p>
+                <p>Area: <%= land.area %> sq ft</p>
+                <form action="/admin/approve-sale/<%= land._id %>" method="POST">
+                    <button type="submit" class="btn">Approve Sale Listing</button>
+                </form>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <p>No pending sale requests</p>
+    <% } %>
+</div>
+
+<%- include('../includes/footer') %> 

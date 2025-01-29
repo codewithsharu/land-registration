@@ -1,0 +1,22 @@
+<nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
+    <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+        <div style="color: white; font-size: 1.5em;">
+            <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
+        </div>
+        
+        <div style="display: flex; gap: 1em;">
+            <% if (locals.user && locals.user.role) { %>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin/dashboard" style="color: white; text-decoration: none;">Admin Dashboard</a>
+                <% } else { %>
+                    <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
+                <% } %>
+                <span style="color: white;">Welcome, <%= user.name %></span>
+                <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
+            <% } else { %>
+                <a href="/login" style="color: white; text-decoration: none;">Login</a>
+                <a href="/register" style="color: white; text-decoration: none;">Register</a>
+            <% } %>
+        </div>
+    </div>
+</nav> 
