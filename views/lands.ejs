@@ -1,0 +1,36 @@
+<!-- views/lands.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Lands</title>
+</head>
+<body>
+    <h1>All Lands</h1>
+    <ul>
+        <% lands.forEach(land => { %>
+            <li>
+                <h2><%= land.title %></h2>
+                <p>Description: <%= land.description %></p>
+                <p>Price: <%= land.price %></p>
+                <p>Location: <%= land.location %></p>
+                <p>Owner: <%= land.owner.name %></p>
+                
+                <% if (land.documents && land.documents.landPicture) { %>
+                    <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" style="max-width: 200px;"/>
+                <% } %>
+
+                <% if (land.documents && land.documents.propertyDocuments) { %>
+                    <h3>Documents:</h3>
+                    <ul>
+                        <li>
+                            <a href="/uploads/<%= land.documents.propertyDocuments %>" target="_blank">View Document</a>
+                        </li>
+                    </ul>
+                <% } %>
+            </li>
+        <% }) %>
+    </ul>
+</body>
+</html>

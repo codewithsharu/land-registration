@@ -223,6 +223,17 @@ app.get('/admin/dashboard', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
+// Render all lands
+app.get('/lands', async (req, res) => {
+    try {
+        const allLands = await Land.find().populate('owner'); // Fetch all lands
+        res.render('lands', { lands: allLands }); // Render the lands.ejs template with the lands data
+    } catch (error) {
+        console.error('Error fetching all lands:', error);
+        res.status(500).send('Error fetching all lands');
+    }
+});
+
 // Approve User
 app.post('/admin/approve-user/:userId', isAuthenticated, isAdmin, async (req, res) => {
     try {
