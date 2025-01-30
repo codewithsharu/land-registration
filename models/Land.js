@@ -6,7 +6,7 @@ const landSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     location: { type: String, required: true },
     area: { type: Number, required: true }, // in square feet
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    landno: { type: String, required: true }, // New field for land number
     aadharId: { type: String, required: true }, // New field for owner's Aadhar ID
     status: { 
         type: String, 
@@ -17,7 +17,7 @@ const landSchema = new mongoose.Schema({
         landPicture: String,
         propertyDocuments: String
     },
-    buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    buyer: { type: String }, // Change from ObjectId to String for buyer's Aadhar ID
     transactionDetails: {
         amount: Number,
         date: Date,

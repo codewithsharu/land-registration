@@ -194,15 +194,14 @@ app.post('/login', async (req, res) => {
 // Dashboard
 app.get('/dashboard', isAuthenticated, async (req, res) => {
     try {
-        const myLands = await Land.find({ owner: req.session.user.userId }).populate('owner'); // Fetch user's lands
-        const pendingLands = await Land.find({ buyer: req.session.user.userId, status: 'pending' }).populate('buyer'); // Fetch pending buy requests
+        console.log('Session Aadhar ID:', req.session.user.aadharId); // Log session Aadhar ID
+        const myLands = await Land.find({ aadharId: req.session.user.aadharId }); // Fetch user's lands using aadharId
 
-        console.log('Pending Lands:', pendingLands); // Log pending lands for debugging
+        console.log('Fetched Lands:', myLands); // Log fetched lands for debugging
 
-        res.render('dashboard', { 
+        res.render('userdashboard', { 
             user: req.session.user,
             myLands: myLands, // Pass user's lands to the view
-            pendingLands: pendingLands // Pass pending buy requests to the view
         });
     } catch (error) {
         console.error('User dashboard error:', error);
@@ -230,7 +229,7 @@ app.get('/admin/dashboard', isAuthenticated, isAdmin, async (req, res) => {
 // Route to render the lands page
 app.get('/lands', isAuthenticated, async (req, res) => {
     try {
-        const lands = await Land.find({ status: 'available' }).populate('owner'); // Fetch available lands
+        const lands = await Land.find({ status: 'available' }); // Fetch available lands
         console.log('Available Lands:', lands); // Log the lands to check if they are fetched correctly
         res.render('lands', { lands, user: req.session.user }); // Pass lands and user data to the view
     } catch (error) {
@@ -254,7 +253,7 @@ app.post('/admin/approve-user/:userId', isAuthenticated, isAdmin, async (req, re
 // Add Land
 app.post('/land/add', upload.fields([{ name: 'landPicture' }, { name: 'propertyDocuments' }]), async (req, res) => {
     try {
-        const { title, description, price, location, area } = req.body;
+        const { title, description, price, location, area, landno } = req.body;
 
         const newLand = new Land({
             title,
@@ -262,7 +261,7 @@ app.post('/land/add', upload.fields([{ name: 'landPicture' }, { name: 'propertyD
             price,
             location,
             area,
-            owner: req.session.user.userId,
+            landno,
             aadharId: req.session.user.aadharId,
             status: 'available',
             documents: {
@@ -276,97 +275,6 @@ app.post('/land/add', upload.fields([{ name: 'landPicture' }, { name: 'propertyD
     } catch (error) {
         console.error('Error adding land:', error);
         res.status(500).send('Error adding land');
-    }
-});
-
-// Buy Land Request
-app.post('/land/buy/:landId/buyerAadharId/:aadharId', isAuthenticated, async (req, res) => {
-    try {
-        const land = await Land.findById(req.params.landId).populate('owner'); // Populate owner details
-        
-        if (!land) {
-            return res.status(404).send('Land not found');
-        }
-
-        // Check if the land is available for purchase
-        if (land.status !== 'available') {
-            return res.status(400).send('Land is not available for purchase');
-        }
-
-        // Update land details
-        land.status = 'pending'; // Set status to pending until transaction is completed
-        land.buyer = req.session.user.userId; // Assign buyer
-        land.transactionDetails = {
-            amount: req.body.amount, // Ensure amount is set from request body
-            transactionId: req.body.transactionId, // Store the transaction ID
-            date: new Date(),
-            status: 'pending',
-            buyerAadharId: req.params.aadharId // Use the Aadhar ID from the URL
-        };
-
-        await land.save();
-
-        res.redirect('/dashboard'); // Redirect to the buyer's dashboard
-    } catch (error) {
-        console.error('Error buying land:', error);
-        res.status(500).send('Error buying land');
-    }
-});
-
-// Accept Buy Request (Transfer Ownership)
-app.post('/land/accept/:landId', isAuthenticated, async (req, res) => {
-    try {
-        const land = await Land.findById(req.params.landId).populate('buyer'); // Populate buyer details
-        if (!land) {
-            return res.status(404).send('Land not found');
-        }
-
-        // Log the current user ID and the land owner ID for debugging
-        console.log('Current User ID:', req.session.user.userId);
-        console.log('Land Owner ID:', land.owner.toString());
-
-        // Check if the current user is the owner of the land
-        if (land.owner.toString() !== req.session.user.userId.toString()) {
-            console.error('Unauthorized: User is not the owner of the land');
-            return res.status(403).send('Unauthorized');
-        }
-
-        // Check if the transaction is pending
-        if (land.transactionDetails.status !== 'pending') {
-            return res.status(400).send('Transaction is not pending');
-        }
-
-        // Transfer ownership
-        land.owner = land.buyer; // Change owner to the buyer
-        land.buyer = null; // Clear the buyer field
-        land.status = 'owned'; // Update status to owned
-        land.transactionDetails.status = 'completed'; // Mark transaction as completed
-
-        await land.save();
-
-        res.redirect('/dashboard'); // Redirect to the owner's dashboard
-    } catch (error) {
-        console.error('Error accepting buy request:', error);
-        res.status(500).send('Error accepting buy request');
-    }
-});
-
-// Request to sell land
-app.post('/land/request-sell/:landId', isAuthenticated, async (req, res) => {
-    try {
-        const land = await Land.findById(req.params.landId);
-        
-        if (!land || land.owner.toString() !== req.session.user.userId.toString()) {
-            return res.status(403).send('Unauthorized');
-        }
-
-        land.status = 'pending_sale';
-        await land.save();
-        
-        res.redirect('/dashboard');
-    } catch (error) {
-        console.error('Error requesting sale:', error);
-        res.status(500).send('Error requesting sale');
     }
 });
 

@@ -10,6 +10,7 @@
     <input type="number" name="price" placeholder="Price" required><br>
     <input type="text" name="location" placeholder="Location" required><br>
     <input type="number" name="area" placeholder="Area in sq ft" required><br>
+    <input type="text" name="landno" placeholder="Land Number" required><br>
     <label>Land Picture:</label><br>
     <input type="file" name="landPicture" accept="image/*" required><br>
     <label>Property Documents:</label><br>
@@ -31,7 +32,12 @@
             <p>Location: <%= land.location %></p>
             <p>Area: <%= land.area %> sq ft</p>
             <p>Status: <%= land.status %></p>
-            <p>Owner Aadhar ID: <%= land.owner.aadharId %></p>
+            <p>Owner Aadhar ID: <%= land.aadharId %></p>
+            <% if (land.aadharId === user.aadharId) { %>
+                <p style="color: green;">You are the owner of this land.</p>
+            <% } else { %>
+                <p style="color: red;">You are not the owner of this land.</p>
+            <% } %>
             <div class="button-group">
                 <% if (land.status === 'owned') { %>
                     <form action="/land/request-sell/<%= land._id %>" method="POST">
@@ -48,35 +54,6 @@
     <% }); %>
 <% } else { %>
     <p>No lands added yet.</p>
-<% } %>
-
-<h2>Pending Buy Requests</h2>
-
-<!-- Display Pending Buy Requests -->
-<% if (pendingLands && pendingLands.length > 0) { %>
-    <h3>Pending Buy Requests</h3>
-    <% pendingLands.forEach(function(land) { %>
-        <div class="land-card">
-            <h4 class="land-title"><%= land.title %></h4>
-            <% if (land.buyer) { %>
-                <p><strong>Buyer:</strong> <%= land.buyer.name %></p>
-                <% if (land.transactionDetails) { %>
-                    <p><strong>Transaction ID:</strong> <%= land.transactionDetails.transactionId %></p>
-                    <p><strong>Amount:</strong> $<%= land.transactionDetails.amount ? land.transactionDetails.amount.toLocaleString() : 'N/A' %></p>
-                    <p><strong>Buyer Aadhar ID:</strong> <%= land.transactionDetails.buyerAadharId %></p>
-                <% } else { %>
-                    <p>No transaction details available.</p>
-                <% } %>
-                <form action="/land/accept/<%= land._id %>" method="POST">
-                    <button type="submit" class="btn">Accept Buy Request</button>
-                </form>
-            <% } else { %>
-                <p>No buyer information available.</p>
-            <% } %>
-        </div>
-    <% }); %>
-<% } else { %>
-    <p>No pending buy requests.</p>
 <% } %>
 
 <%- include('includes/footer') %> 

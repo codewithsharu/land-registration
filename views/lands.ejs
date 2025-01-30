@@ -115,21 +115,23 @@
             <h2>Available Lands</h2>
             <% if (lands && lands.length > 0) { %>
                 <% lands.forEach(function(land) { %>
-                    <div class="land-card">
-                        <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" class="land-image">
-                        <h4 class="land-title"><%= land.title %></h4>
-                        <p><strong>Description:</strong> <%= land.description %></p>
-                        <p><strong>Price:</strong> $<%= land.price %></p>
-                        <p><strong>Location:</strong> <%= land.location %></p>
-                        <p><strong>Area:</strong> <%= land.area %> sq ft</p>
-                        <p><strong>Status:</strong> <%= land.status %></p>
-                        <form id="buyForm" action="/land/buy/<%= land._id %>/buyerAadharId/<%= user.aadharId %>" method="POST" onsubmit="return handleBuySubmit(this);">
-                            <input type="hidden" name="buyerAadharId" value="<%= user.aadharId %>">
-                            <input type="text" name="transactionId" placeholder="Enter Transaction ID" required>
-                            <input type="number" name="amount" placeholder="Enter Amount" required>
-                            <button type="submit" class="btn">Buy</button>
-                        </form>
-                    </div>
+                    <% if (land.aadharId !== user.aadharId) { %> <!-- Check if the land owner Aadhar ID is different from the user's Aadhar ID -->
+                        <div class="land-card">
+                            <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" class="land-image">
+                            <h4 class="land-title"><%= land.title %></h4>
+                            <p><strong>Description:</strong> <%= land.description %></p>
+                            <p><strong>Price:</strong> $<%= land.price %></p>
+                            <p><strong>Location:</strong> <%= land.location %></p>
+                            <p><strong>Area:</strong> <%= land.area %> sq ft</p>
+                            <p><strong>Status:</strong> <%= land.status %></p>
+                            <form id="buyForm" action="/land/buy/<%= land._id %>/buyerAadharId/<%= user.aadharId %>" method="POST" onsubmit="return handleBuySubmit(this);">
+                                <input type="hidden" name="buyerAadharId" value="<%= user.aadharId %>">
+                                <input type="text" name="transactionId" placeholder="Enter Transaction ID" required>
+                                <input type="number" name="amount" placeholder="Enter Amount" required>
+                                <button type="submit" class="btn">Buy</button>
+                            </form>
+                        </div>
+                    <% } %>
                 <% }); %>
             <% } else { %>
                 <p>No available lands found.</p>
