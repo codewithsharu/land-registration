@@ -347,6 +347,74 @@ app.get('/test-login', async (req, res) => {
     res.send('Login successful');
 });
 
+// Buy Land
+app.post('/buy/:buyerAadharId/:landno', isAuthenticated, async (req, res) => {
+    try {
+        const { buyerAadharId, landno } = req.params;
+        const transactionId = req.body.transactionId; // Get transaction ID from the request body
+
+        // Find the land by land number
+        const land = await Land.findOne({ landno });
+
+        if (!land) {
+            return res.status(404).send('Land not found');
+        }
+
+        // Update the land with buyer's Aadhar ID and transaction details
+        land.buyerAadharId = buyerAadharId;
+        land.transactionId = transactionId;
+        land.buyingStatus = 'pending'; // Set buying status to pending for verification
+        land.status = 'pending'; // Change status to pending
+
+        await land.save();
+
+        res.status(200).send('Land purchase initiated successfully. Awaiting verification.');
+    } catch (error) {
+        console.error('Error buying land:', error);
+        res.status(500).send('Error processing purchase');
+    }
+});
+
+// Transfer Ownership
+app.post('/transfer/:landno/:buyerAadharId', isAuthenticated, async (req, res) => {
+    try {
+        const { landno, buyerAadharId } = req.params;
+
+        // Find the land by land number
+        const land = await Land.findOne({ landno });
+
+        if (!land) {
+            return res.status(404).send('Land not found');
+        }
+
+        // Update the land's owner details
+        land.aadharId = buyerAadharId; // Transfer ownership to the buyer
+        land.status = 'owned'; // Change status to owned
+        land.buyingStatus = 'completed'; // Mark buying status as completed
+
+        await land.save();
+
+        res.status(200).send('Ownership transferred successfully.');
+    } catch (error) {
+        console.error('Error transferring ownership:', error);
+        res.status(500).send('Error transferring ownership');
+    }
+});
+
+// Verification page for pending land transactions
+app.get('/verification', isAuthenticated, async (req, res) => {
+    try {
+        // Fetch lands where the owner's Aadhar ID matches the user's Aadhar ID and the status is 'pending'
+        const pendingLands = await Land.find({ aadharId: req.session.user.aadharId, status: 'pending' });
+        
+        // Render the verification page with the fetched lands
+        res.render('verification', { lands: pendingLands, user: req.session.user });
+    } catch (error) {
+        console.error('Error fetching pending lands for verification:', error);
+        res.status(500).send('Error fetching pending lands');
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 }); 

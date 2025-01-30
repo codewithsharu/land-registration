@@ -11,19 +11,15 @@ const landSchema = new mongoose.Schema({
     status: { 
         type: String, 
         enum: ['owned', 'pending_sale', 'available', 'pending', 'sold'], 
-        default: 'owned' 
+        default: 'available' // Default to 'available'
     },
     documents: {
         landPicture: String,
         propertyDocuments: String
     },
-    buyer: { type: String }, // Change from ObjectId to String for buyer's Aadhar ID
-    transactionDetails: {
-        amount: Number,
-        date: Date,
-        status: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' },
-        buyerAadharId: String // Ensure this field is included
-    },
+    buyerAadharId: { type: String }, // New field for buyer's Aadhar ID
+    transactionId: { type: String }, // New field for transaction ID
+    buyingStatus: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' }, // New field for buying status
     createdAt: { type: Date, default: Date.now }
 });
 

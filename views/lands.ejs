@@ -124,10 +124,8 @@
                             <p><strong>Location:</strong> <%= land.location %></p>
                             <p><strong>Area:</strong> <%= land.area %> sq ft</p>
                             <p><strong>Status:</strong> <%= land.status %></p>
-                            <form id="buyForm" action="/land/buy/<%= land._id %>/buyerAadharId/<%= user.aadharId %>" method="POST" onsubmit="return handleBuySubmit(this);">
-                                <input type="hidden" name="buyerAadharId" value="<%= user.aadharId %>">
+                            <form id="buyForm" action="/buy/<%= user.aadharId %>/<%= land.landno %>" method="POST">
                                 <input type="text" name="transactionId" placeholder="Enter Transaction ID" required>
-                                <input type="number" name="amount" placeholder="Enter Amount" required>
                                 <button type="submit" class="btn">Buy</button>
                             </form>
                         </div>

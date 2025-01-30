@@ -1,0 +1,36 @@
+<%- include('includes/header', { title: 'Pending Land Verification' }) %>
+
+<h2>Pending Land Transactions</h2>
+
+<% if (lands && lands.length > 0) { %>
+    <table>
+        <thead>
+            <tr>
+                <th>Land Title</th>
+                <th>Land Number</th>
+                <th>Buyer Aadhar ID</th>
+                <th>Transaction ID</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% lands.forEach(function(land) { %>
+                <tr>
+                    <td><%= land.title %></td>
+                    <td><%= land.landno %></td>
+                    <td><%= land.buyerAadharId %></td>
+                    <td><%= land.transactionId %></td>
+                    <td>
+                        <form action="/transfer/<%= land.landno %>/<%= land.buyerAadharId %>" method="POST">
+                            <button type="submit" class="btn">Transfer Ownership</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+<% } else { %>
+    <p>No pending land transactions found.</p>
+<% } %>
+
+<%- include('includes/footer') %> 
