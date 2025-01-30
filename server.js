@@ -302,13 +302,10 @@ app.post('/land/buy/:landId', isAuthenticated, async (req, res) => {
             transactionId: req.body.transactionId, // Store the transaction ID
             date: new Date(),
             status: 'pending',
-            buyerAadharId: req.session.user.aadharId // Store the buyer's Aadhar ID
+            buyerAadharId: req.session.user.aadharId // Use the current user's Aadhar ID
         };
 
         await land.save();
-
-        // Optionally, notify the seller about the purchase request
-        // You can implement a notification system here if needed
 
         res.redirect('/dashboard'); // Redirect to the buyer's dashboard
     } catch (error) {
