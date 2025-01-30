@@ -116,7 +116,7 @@
             <h2>Available Lands</h2>
             <div>
                 <% lands.forEach(land => { %>
-                    <div class="land-card" onclick="showPopup('<%= land.title %>', '<%= land.description %>', '<%= land.price.toLocaleString() %>', '<%= land.location %>', '<%= land.owner.name %>', '<%= land.documents.propertyDocuments ? '/uploads/' + land.documents.propertyDocuments : '' %>')">
+                    <div class="land-card" onclick="showPopup('<%= land.title %>', '<%= land.description %>', '<%= land.price.toLocaleString() %>', '<%= land.location %>', '<%= land.owner.name %>', '<%= land.documents.propertyDocuments ? '/uploads/' + land.documents.propertyDocuments : '' %>', '<%= land._id %>')">
                         <% if (land.documents && land.documents.landPicture) { %>
                             <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" class="land-image"/>
                         <% } %>
@@ -138,6 +138,11 @@
             <p><strong>Location:</strong> <span id="popupLocation"></span></p>
             <p><strong>Owner:</strong> <span id="popupOwner"></span></p>
             <div id="popupDocs"></div>
+            <form id="buyForm" action="" method="POST">
+                <input type="text" name="transactionId" placeholder="Enter Transaction ID" required>
+                <input type="number" name="amount" placeholder="Enter Amount" required> <!-- Ensure amount is included -->
+                <button type="submit" class="btn">Buy</button>
+            </form>
         </div>
     </div>
 
@@ -146,13 +151,14 @@
     </footer>
 
     <script>
-        function showPopup(title, description, price, location, owner, docs) {
+        function showPopup(title, description, price, location, owner, docs, landId) {
             document.getElementById('popupTitle').innerText = title;
             document.getElementById('popupDescription').innerText = description;
             document.getElementById('popupPrice').innerText = price;
             document.getElementById('popupLocation').innerText = location;
             document.getElementById('popupOwner').innerText = owner;
             document.getElementById('popupDocs').innerHTML = docs ? '<a href="' + docs + '" target="_blank" class="view-docs-btn">View Document</a>' : '';
+            document.getElementById('buyForm').action = '/land/buy/' + landId; // Set the form action to the buy route
             document.getElementById('landPopup').style.display = 'flex';
         }
 

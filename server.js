@@ -80,11 +80,10 @@ app.set('view engine', 'ejs');
 
 // Middleware to check if user is logged in
 const isAuthenticated = (req, res, next) => {
-    if (req.session.isLoggedIn && req.session.user) {
-        res.locals.user = req.session.user; // Make user data available to all views
+    if (req.session.isLoggedIn) {
         next();
     } else {
-        res.redirect('/login');
+        res.redirect('/login'); // Redirect to login if not authenticated
     }
 };
 
@@ -178,8 +177,9 @@ app.post('/login', async (req, res) => {
             status: user.status
         };
         
-        req.session.isLoggedIn = true;
+        req.session.isLoggedIn = true; // Set logged in status
 
+        // Redirect based on user role
         if (user.role === 'admin') {
             res.redirect('/admin/dashboard');
         } else {
@@ -195,10 +195,14 @@ app.post('/login', async (req, res) => {
 app.get('/dashboard', isAuthenticated, async (req, res) => {
     try {
         const myLands = await Land.find({ owner: req.session.user.userId }).populate('owner'); // Fetch user's lands
+        const pendingLands = await Land.find({ buyer: req.session.user.userId, status: 'pending' }).populate('buyer'); // Fetch pending buy requests
+
+        console.log('Pending Lands:', pendingLands); // Log pending lands for debugging
 
         res.render('dashboard', { 
             user: req.session.user,
-            myLands: myLands // Pass user's lands to the view
+            myLands: myLands, // Pass user's lands to the view
+            pendingLands: pendingLands // Pass pending buy requests to the view
         });
     } catch (error) {
         console.error('User dashboard error:', error);
@@ -224,7 +228,8 @@ app.get('/admin/dashboard', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 // Fetch all lands
-app.get('/lands', async (req, res) => {
+app.get('/lands', isAuthenticated, async (req, res) => {
+    console.log('Session Data:', req.session.user); // Log session data
     try {
         const userAadharId = req.session.user.aadharId; // Get Aadhar ID from session
         const allLands = await Land.find({ aadharId: { $ne: userAadharId } }).populate('owner'); // Exclude lands owned by the user
@@ -293,14 +298,17 @@ app.post('/land/buy/:landId', isAuthenticated, async (req, res) => {
         land.status = 'pending'; // Set status to pending until transaction is completed
         land.buyer = req.session.user.userId; // Assign buyer
         land.transactionDetails = {
-            amount: req.body.amount, // Assuming you pass the amount in the request body
+            amount: req.body.amount, // Ensure amount is set from request body
+            transactionId: req.body.transactionId, // Store the transaction ID
             date: new Date(),
-            status: 'pending'
+            status: 'pending',
+            buyerAadharId: req.session.user.aadharId // Store the buyer's Aadhar ID
         };
 
         await land.save();
 
-        // Optionally, you can notify the seller about the purchase request here
+        // Optionally, notify the seller about the purchase request
+        // You can implement a notification system here if needed
 
         res.redirect('/dashboard'); // Redirect to the buyer's dashboard
     } catch (error) {
@@ -309,21 +317,41 @@ app.post('/land/buy/:landId', isAuthenticated, async (req, res) => {
     }
 });
 
-// Approve Sale
-app.post('/land/approve-sale/:landId', isAuthenticated, isAdmin, async (req, res) => {
+// Accept Buy Request (Transfer Ownership)
+app.post('/land/accept/:landId', isAuthenticated, async (req, res) => {
     try {
-        const land = await Land.findById(req.params.landId);
+        const land = await Land.findById(req.params.landId).populate('buyer'); // Populate buyer details
         if (!land) {
             return res.status(404).send('Land not found');
         }
 
-        land.status = 'available';
+        // Log the current user ID and the land owner ID for debugging
+        console.log('Current User ID:', req.session.user.userId);
+        console.log('Land Owner ID:', land.owner.toString());
+
+        // Check if the current user is the owner of the land
+        if (land.owner.toString() !== req.session.user.userId.toString()) {
+            console.error('Unauthorized: User is not the owner of the land');
+            return res.status(403).send('Unauthorized');
+        }
+
+        // Check if the transaction is pending
+        if (land.transactionDetails.status !== 'pending') {
+            return res.status(400).send('Transaction is not pending');
+        }
+
+        // Transfer ownership
+        land.owner = land.buyer; // Change owner to the buyer
+        land.buyer = null; // Clear the buyer field
+        land.status = 'owned'; // Update status to owned
+        land.transactionDetails.status = 'completed'; // Mark transaction as completed
+
         await land.save();
 
-        res.redirect('/admin/dashboard');
+        res.redirect('/dashboard'); // Redirect to the owner's dashboard
     } catch (error) {
-        console.error('Error approving sale:', error);
-        res.status(500).send('Error approving sale');
+        console.error('Error accepting buy request:', error);
+        res.status(500).send('Error accepting buy request');
     }
 });
 
@@ -358,7 +386,7 @@ app.get('/logout', (req, res) => {
 });
 
 // Add a route to check session status (useful for debugging)
-app.get('/session-check', (req, res) => {
+app.get('/sc', (req, res) => {
     res.json({
         isLoggedIn: req.session.isLoggedIn || false,
         user: req.session.user || null
