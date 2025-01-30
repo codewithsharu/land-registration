@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
         aadharCard: String,
         panCard: String
     },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    ownedLands: [{ type: String }]
 });
 
 module.exports = mongoose.model('User', userSchema); 

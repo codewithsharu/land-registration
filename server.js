@@ -227,16 +227,15 @@ app.get('/admin/dashboard', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// Fetch all lands
+// Route to render the lands page
 app.get('/lands', isAuthenticated, async (req, res) => {
-    console.log('Session Data:', req.session.user); // Log session data
     try {
-        const userAadharId = req.session.user.aadharId; // Get Aadhar ID from session
-        const allLands = await Land.find({ aadharId: { $ne: userAadharId } }).populate('owner'); // Exclude lands owned by the user
-        res.render('lands', { lands: allLands }); // Render the lands.ejs template with the lands data
+        const lands = await Land.find({ status: 'available' }).populate('owner'); // Fetch available lands
+        console.log('Available Lands:', lands); // Log the lands to check if they are fetched correctly
+        res.render('lands', { lands, user: req.session.user }); // Pass lands and user data to the view
     } catch (error) {
-        console.error('Error fetching all lands:', error);
-        res.status(500).send('Error fetching all lands');
+        console.error('Error fetching lands:', error);
+        res.status(500).send('Error fetching lands');
     }
 });
 
@@ -281,7 +280,7 @@ app.post('/land/add', upload.fields([{ name: 'landPicture' }, { name: 'propertyD
 });
 
 // Buy Land Request
-app.post('/land/buy/:landId', isAuthenticated, async (req, res) => {
+app.post('/land/buy/:landId/buyerAadharId/:aadharId', isAuthenticated, async (req, res) => {
     try {
         const land = await Land.findById(req.params.landId).populate('owner'); // Populate owner details
         
@@ -302,7 +301,7 @@ app.post('/land/buy/:landId', isAuthenticated, async (req, res) => {
             transactionId: req.body.transactionId, // Store the transaction ID
             date: new Date(),
             status: 'pending',
-            buyerAadharId: req.session.user.aadharId // Use the current user's Aadhar ID
+            buyerAadharId: req.params.aadharId // Use the Aadhar ID from the URL
         };
 
         await land.save();

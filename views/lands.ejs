@@ -106,7 +106,6 @@
                     <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
                 <% } else { %>
                     <a href="/dashboard" style="color: white; text-decoration: none;">dashboard</a>
-                    <!-- <a href="/register" style="color: white; text-decoration: none;">Register</a> -->
                 <% } %>
             </div>
         </div>
@@ -114,37 +113,29 @@
     <main>
         <section class="land-list">
             <h2>Available Lands</h2>
-            <div>
-                <% lands.forEach(land => { %>
-                    <div class="land-card" onclick="showPopup('<%= land.title %>', '<%= land.description %>', '<%= land.price.toLocaleString() %>', '<%= land.location %>', '<%= land.owner.name %>', '<%= land.documents.propertyDocuments ? '/uploads/' + land.documents.propertyDocuments : '' %>', '<%= land._id %>')">
-                        <% if (land.documents && land.documents.landPicture) { %>
-                            <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" class="land-image"/>
-                        <% } %>
-                        <h3 class="land-title"><%= land.title %></h3>
-                        <p class="land-price">$<%= land.price.toLocaleString() %></p>
+            <% if (lands && lands.length > 0) { %>
+                <% lands.forEach(function(land) { %>
+                    <div class="land-card">
+                        <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" class="land-image">
+                        <h4 class="land-title"><%= land.title %></h4>
+                        <p><strong>Description:</strong> <%= land.description %></p>
+                        <p><strong>Price:</strong> $<%= land.price %></p>
+                        <p><strong>Location:</strong> <%= land.location %></p>
+                        <p><strong>Area:</strong> <%= land.area %> sq ft</p>
+                        <p><strong>Status:</strong> <%= land.status %></p>
+                        <form id="buyForm" action="/land/buy/<%= land._id %>/buyerAadharId/<%= user.aadharId %>" method="POST" onsubmit="return handleBuySubmit(this);">
+                            <input type="hidden" name="buyerAadharId" value="<%= user.aadharId %>">
+                            <input type="text" name="transactionId" placeholder="Enter Transaction ID" required>
+                            <input type="number" name="amount" placeholder="Enter Amount" required>
+                            <button type="submit" class="btn">Buy</button>
+                        </form>
                     </div>
-                <% }) %>
-            </div>
+                <% }); %>
+            <% } else { %>
+                <p>No available lands found.</p>
+            <% } %>
         </section>
     </main>
-
-    <!-- Popup for land details -->
-    <div class="popup" id="landPopup">
-        <div class="popup-content">
-            <span class="close-btn" onclick="closePopup()">&times;</span>
-            <h3 id="popupTitle"></h3>
-            <p><strong>Description:</strong> <span id="popupDescription"></span></p>
-            <p><strong>Price:</strong> $<span id="popupPrice"></span></p>
-            <p><strong>Location:</strong> <span id="popupLocation"></span></p>
-            <p><strong>Owner:</strong> <span id="popupOwner"></span></p>
-            <div id="popupDocs"></div>
-            <form id="buyForm" action="" method="POST">
-                <input type="text" name="transactionId" placeholder="Enter Transaction ID" required>
-                <input type="number" name="amount" placeholder="Enter Amount" required> <!-- Ensure amount is included -->
-                <button type="submit" class="btn">Buy</button>
-            </form>
-        </div>
-    </div>
 
     <footer style=" width: 100%; background-color: #333; bottom: 0; position: fixed; color: white; text-align: center; ">
         <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
@@ -158,12 +149,19 @@
             document.getElementById('popupLocation').innerText = location;
             document.getElementById('popupOwner').innerText = owner;
             document.getElementById('popupDocs').innerHTML = docs ? '<a href="' + docs + '" target="_blank" class="view-docs-btn">View Document</a>' : '';
-            document.getElementById('buyForm').action = '/land/buy/' + landId; // Set the form action to the buy route
+            document.getElementById('buyForm').action = '/land/buy/' + landId + '/buyerAadharId/' + user.aadharId; // Set the form action to the buy route with Aadhar ID
             document.getElementById('landPopup').style.display = 'flex';
         }
 
         function closePopup() {
             document.getElementById('landPopup').style.display = 'none';
+        }
+
+        function handleBuySubmit(form) {
+            // Optionally, you can add any validation or processing here
+            // Redirect to the buyer dashboard after form submission
+            form.action = '/buyer/dashboard'; // Change the action to redirect after submission
+            return true; // Allow the form to submit
         }
     </script>
 </body>

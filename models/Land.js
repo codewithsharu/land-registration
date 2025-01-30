@@ -1,4 +1,3 @@
-// models/Land.js
 const mongoose = require('mongoose');
 
 const landSchema = new mongoose.Schema({
@@ -22,7 +21,8 @@ const landSchema = new mongoose.Schema({
     transactionDetails: {
         amount: Number,
         date: Date,
-        status: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' }
+        status: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' },
+        buyerAadharId: String // Ensure this field is included
     },
     createdAt: { type: Date, default: Date.now }
 });
