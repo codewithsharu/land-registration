@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Land Marketplace</title>
-    <link rel="stylesheet" href="/styles/main.css"> <!-- Link to external CSS for styling -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,6 +62,24 @@
     </style>
 </head>
 <body>
+    <nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+            <div style="color: white; font-size: 1.5em;">
+                <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
+            </div>
+            <div style="display: flex; gap: 1em;">
+                <% if (user && user.role) { %>
+                    <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
+                    <span style="color: white;">Welcome, <%= user.name %></span>
+                    <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
+                <% } else { %>
+                    <a href="/login" style="color: white; text-decoration: none;">Login</a>
+                    <a href="/register" style="color: white; text-decoration: none;">Register</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <h1>Register for Land Marketplace</h1>
         
@@ -82,5 +99,9 @@
         <p>Already have an account? <a href="/login">Login here</a></p>
         <p><a href="/">Back to Home</a></p>
     </div>
+
+    <footer style=" width: 100%; background-color: #333; color: white; height: 50px; bottom: 0; text-align: center;">
+        <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
+    </footer>
 </body>
 </html> 

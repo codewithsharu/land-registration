@@ -7,59 +7,74 @@
     <link rel="stylesheet" href="/styles/main.css"> <!-- Link to external CSS for styling -->
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f4f4; /* Light background for a professional look */
+            color: #333; /* Dark text for better readability */
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center; /* Center the content horizontally */
+            align-items: center; /* Center the content vertically */
+            height: 100vh; /* Full viewport height */
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            max-width: 900px;
+            width: 100%; /* Make the container responsive */
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center; /* Center text within the container */
         }
         h1 {
-            color: #007bff;
-            text-align: center;
+            color: #007bff; /* Blue color for the heading */
+            font-size: 2.8em; /* Larger font size for emphasis */
+            margin-bottom: 20px;
         }
         .nav-links {
-            text-align: center;
-            margin: 20px 0;
+            margin: 30px 0;
         }
         .nav-links a {
-            margin: 0 15px;
+            margin: 0 20px;
             text-decoration: none;
-            color: #007bff;
+            color: #007bff; /* Blue color for links */
             font-weight: bold;
-            transition: color 0.3s;
+            transition: all 0.3s ease;
+            padding: 12px 20px; /* Padding for buttons */
+            border: 2px solid #007bff; /* Border for buttons */
+            border-radius: 5px; /* Rounded corners */
+            background-color: transparent; /* Transparent background */
         }
         .nav-links a:hover {
-            color: #0056b3;
+            color: #ffffff; /* Change text color on hover */
+            background-color: #007bff; /* Background color on hover */
+        }
+        .about-section {
+            margin-top: 30px;
         }
         h2 {
-            color: #333;
-            margin-top: 20px;
+            color: #333; /* Dark color for subheadings */
+            font-size: 1.8em; /* Slightly larger subheading */
         }
         p {
-            color: #555;
-            line-height: 1.6;
+            color: #555; /* Medium gray for paragraph text */
+            line-height: 1.8;
+            font-size: 1.1em; /* Slightly larger font size for readability */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Land Marketplace</h1>
+        <h1>Welcome to the Land Marketplace</h1>
         
         <div class="nav-links">
             <a href="/login">Login</a>
             <a href="/register">Register</a>
         </div>
 
-        <div>
+        <div class="about-section">
             <h2>About Us</h2>
-            <p>Welcome to the Land Marketplace platform where you can buy and sell land properties securely.</p>
+            <p>Discover a secure platform for buying and selling land properties with ease and confidence.</p>
         </div>
     </div>
 </body>

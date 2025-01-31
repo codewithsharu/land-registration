@@ -4,7 +4,6 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
-const bcrypt = require('bcryptjs');
 
 const User = require('./models/User');
 const Land = require('./models/Land');
@@ -13,33 +12,29 @@ const SaleRequest = require('./models/SaleRequest');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Add these lines near the top of your server.js, after creating the Express app
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// Add this middleware to log all requests (for debugging)
 app.use((req, res, next) => {
     console.log('Request URL:', req.url);
     next();
 });
 
-// MongoDB connection
 mongoose.connect('mongodb+srv://shareenpan2:Fgouter55@cluster0.s3dpu.mongodb.net/land-marketplace', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-    family: 4 // Use IPv4, skip trying IPv6
+    serverSelectionTimeoutMS: 5000,
+    family: 4
 })
 .then(() => {
     console.log('Successfully connected to MongoDB.');
-    setupDefaultAdmin(); // Call the function to set up the default admin
+    setupDefaultAdmin();
 })
 .catch(err => {
     console.error('MongoDB connection error:', err);
-    process.exit(1); // Exit with failure
+    process.exit(1);
 });
 
-// Add this to handle MongoDB connection errors after initial connection
 mongoose.connection.on('error', err => {
     console.error('MongoDB connection error:', err);
 });
@@ -48,13 +43,11 @@ mongoose.connection.on('disconnected', () => {
     console.log('MongoDB disconnected');
 });
 
-// Handle process termination
 process.on('SIGINT', async () => {
     await mongoose.connection.close();
     process.exit(0);
 });
 
-// Multer configuration for file uploads
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
         cb(null, 'public/uploads/');
@@ -65,7 +58,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(session({
@@ -73,21 +65,19 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 app.set('view engine', 'ejs');
 
-// Middleware to check if user is logged in
 const isAuthenticated = (req, res, next) => {
     if (req.session.isLoggedIn) {
         next();
     } else {
-        res.redirect('/login'); // Redirect to login if not authenticated
+        res.redirect('/login');
     }
 };
 
-// Middleware to check if user is admin
 const isAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'admin') {
         next();
@@ -96,29 +86,25 @@ const isAdmin = (req, res, next) => {
     }
 };
 
-// Routes
 app.get('/', (req, res) => {
-    res.render('index');
+    res.render('login', { user: req.session.user });
 });
 
-// Login page route
 app.get('/login', (req, res) => {
     res.render('login');
 });
 
-// Register page route
 app.get('/register', (req, res) => {
-    res.render('register');
+    if (req.session.user) {
+        return res.redirect('/dashboard');
+    }
+    res.render('register', { user: req.session.user });
 });
 
-// Registration
 app.post('/register', upload.fields([{ name: 'aadharCard' }, { name: 'panCard' }]), async (req, res) => {
     try {
-        console.log('Registration data:', req.body); // Log the incoming data
-
         const { name, email, password, aadharId, panNumber } = req.body;
 
-        // Validate input data
         if (!name || !email || !password || !aadharId || !panNumber) {
             return res.status(400).send('All fields are required.');
         }
@@ -131,14 +117,14 @@ app.post('/register', upload.fields([{ name: 'aadharCard' }, { name: 'panCard' }
         const newUser = new User({
             name,
             email,
-            password, // Use plain text for testing; hash in production
+            password,
             aadharId,
             panNumber,
             role: 'user',
             status: 'pending',
             documents: {
-                aadharCard: req.files['aadharCard'][0].filename, // Save the filename
-                panCard: req.files['panCard'][0].filename // Save the filename
+                aadharCard: req.files['aadharCard'][0].filename,
+                panCard: req.files['panCard'][0].filename
             }
         });
 
@@ -150,7 +136,6 @@ app.post('/register', upload.fields([{ name: 'aadharCard' }, { name: 'panCard' }
     }
 });
 
-// Login
 app.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
@@ -158,7 +143,6 @@ app.post('/login', async (req, res) => {
             return res.render('login', { error: 'Invalid email or password' });
         }
 
-        // Compare plain text password
         if (user.password !== req.body.password) {
             return res.render('login', { error: 'Invalid email or password' });
         }
@@ -167,7 +151,6 @@ app.post('/login', async (req, res) => {
             return res.render('login', { error: 'Your account is pending approval' });
         }
 
-        // Store user details in session
         req.session.user = {
             userId: user._id,
             name: user.name,
@@ -177,9 +160,8 @@ app.post('/login', async (req, res) => {
             status: user.status
         };
         
-        req.session.isLoggedIn = true; // Set logged in status
+        req.session.isLoggedIn = true;
 
-        // Redirect based on user role
         if (user.role === 'admin') {
             res.redirect('/admin/dashboard');
         } else {
@@ -191,17 +173,12 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Dashboard
 app.get('/dashboard', isAuthenticated, async (req, res) => {
     try {
-        console.log('Session Aadhar ID:', req.session.user.aadharId); // Log session Aadhar ID
-        const myLands = await Land.find({ aadharId: req.session.user.aadharId }); // Fetch user's lands using aadharId
-
-        console.log('Fetched Lands:', myLands); // Log fetched lands for debugging
-
+        const myLands = await Land.find({ aadharId: req.session.user.aadharId });
         res.render('userdashboard', { 
             user: req.session.user,
-            myLands: myLands, // Pass user's lands to the view
+            myLands: myLands,
         });
     } catch (error) {
         console.error('User dashboard error:', error);
@@ -209,16 +186,15 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     }
 });
 
-// Admin Dashboard
 app.get('/admin/dashboard', isAuthenticated, isAdmin, async (req, res) => {
     try {
-        const pendingUsers = await User.find({ status: 'pending' }); // Fetch pending users
-        const pendingSales = await SaleRequest.find({ status: 'pending' }); // Fetch pending sale requests
+        const pendingUsers = await User.find({ status: 'pending' });
+        const pendingSales = await SaleRequest.find({ status: 'pending' });
 
         res.render('admin/dashboard', { 
             user: req.session.user,
-            pendingUsers: pendingUsers, // Pass pending users to the view
-            pendingSales: pendingSales // Pass pending sales to the view
+            pendingUsers: pendingUsers,
+            pendingSales: pendingSales
         });
     } catch (error) {
         console.error('Admin dashboard error:', error);
@@ -226,19 +202,16 @@ app.get('/admin/dashboard', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// Route to render the lands page
 app.get('/lands', isAuthenticated, async (req, res) => {
     try {
-        const lands = await Land.find({ status: 'available' }); // Fetch available lands
-        console.log('Available Lands:', lands); // Log the lands to check if they are fetched correctly
-        res.render('lands', { lands, user: req.session.user }); // Pass lands and user data to the view
+        const lands = await Land.find({ status: 'available' });
+        res.render('lands', { lands, user: req.session.user });
     } catch (error) {
         console.error('Error fetching lands:', error);
         res.status(500).send('Error fetching lands');
     }
 });
 
-// Approve User
 app.post('/admin/approve-user/:userId', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -250,7 +223,6 @@ app.post('/admin/approve-user/:userId', isAuthenticated, isAdmin, async (req, re
     }
 });
 
-// Add Land
 app.post('/land/add', upload.fields([{ name: 'landPicture' }, { name: 'propertyDocuments' }]), async (req, res) => {
     try {
         const { title, description, price, location, area, landno } = req.body;
@@ -278,7 +250,6 @@ app.post('/land/add', upload.fields([{ name: 'landPicture' }, { name: 'propertyD
     }
 });
 
-// Logout
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -289,7 +260,6 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// Add a route to check session status (useful for debugging)
 app.get('/sc', (req, res) => {
     res.json({
         isLoggedIn: req.session.isLoggedIn || false,
@@ -297,7 +267,6 @@ app.get('/sc', (req, res) => {
     });
 });
 
-// Function to set up default admin user
 async function setupDefaultAdmin() {
     const adminExists = await User.findOne({ role: 'admin' });
 
@@ -305,7 +274,7 @@ async function setupDefaultAdmin() {
         const adminUser = new User({
             name: 'Admin User',
             email: 'admin@example.com',
-            password: 'admin123', // Use plain text for testing; hash in production
+            password: 'admin123',
             aadharId: '111111111111',
             panNumber: 'ABCDE1234F',
             role: 'admin',
@@ -320,15 +289,14 @@ async function setupDefaultAdmin() {
 }
 
 app.get('/test-login', async (req, res) => {
-    const testEmail = 'admin@example.com'; // Change to the email you want to test
-    const testPassword = 'admin123'; // Change to the password you want to test
+    const testEmail = 'admin@example.com';
+    const testPassword = 'admin123';
 
     const user = await User.findOne({ email: testEmail });
     if (!user) {
         return res.send('User not found');
     }
 
-    // Compare plain text password
     if (user.password !== testPassword) {
         return res.send('Invalid password');
     }
@@ -347,24 +315,21 @@ app.get('/test-login', async (req, res) => {
     res.send('Login successful');
 });
 
-// Buy Land
 app.post('/buy/:buyerAadharId/:landno', isAuthenticated, async (req, res) => {
     try {
         const { buyerAadharId, landno } = req.params;
-        const transactionId = req.body.transactionId; // Get transaction ID from the request body
+        const transactionId = req.body.transactionId;
 
-        // Find the land by land number
         const land = await Land.findOne({ landno });
 
         if (!land) {
             return res.status(404).send('Land not found');
         }
 
-        // Update the land with buyer's Aadhar ID and transaction details
         land.buyerAadharId = buyerAadharId;
         land.transactionId = transactionId;
-        land.buyingStatus = 'pending'; // Set buying status to pending for verification
-        land.status = 'pending'; // Change status to pending
+        land.buyingStatus = 'pending';
+        land.status = 'pending';
 
         await land.save();
 
@@ -375,22 +340,19 @@ app.post('/buy/:buyerAadharId/:landno', isAuthenticated, async (req, res) => {
     }
 });
 
-// Transfer Ownership
 app.post('/transfer/:landno/:buyerAadharId', isAuthenticated, async (req, res) => {
     try {
         const { landno, buyerAadharId } = req.params;
 
-        // Find the land by land number
         const land = await Land.findOne({ landno });
 
         if (!land) {
             return res.status(404).send('Land not found');
         }
 
-        // Update the land's owner details
-        land.aadharId = buyerAadharId; // Transfer ownership to the buyer
-        land.status = 'owned'; // Change status to owned
-        land.buyingStatus = 'completed'; // Mark buying status as completed
+        land.aadharId = buyerAadharId;
+        land.status = 'owned';
+        land.buyingStatus = 'completed';
 
         await land.save();
 
@@ -401,13 +363,9 @@ app.post('/transfer/:landno/:buyerAadharId', isAuthenticated, async (req, res) =
     }
 });
 
-// Verification page for pending land transactions
 app.get('/verification', isAuthenticated, async (req, res) => {
     try {
-        // Fetch lands where the owner's Aadhar ID matches the user's Aadhar ID and the status is 'pending'
         const pendingLands = await Land.find({ aadharId: req.session.user.aadharId, status: 'pending' });
-        
-        // Render the verification page with the fetched lands
         res.render('verification', { lands: pendingLands, user: req.session.user });
     } catch (error) {
         console.error('Error fetching pending lands for verification:', error);

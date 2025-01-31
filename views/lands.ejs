@@ -1,168 +1,324 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Lands - Land Marketplace</title>
-    <link rel="stylesheet" href="/styles/main.css"> <!-- Link to external CSS for styling -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for interactivity -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 20px;
-        }
-        .land-card {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px;
-            width: 250px; /* Increased width for better text space */
-            display: inline-block;
-            vertical-align: top;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            background-color: #fff; /* White background for cards */
-            cursor: pointer; /* Indicate that the card is clickable */
-            transition: transform 0.2s; /* Smooth scaling effect */
-        }
-        .land-card:hover {
-            transform: scale(1.02); /* Slightly enlarge card on hover */
-        }
-        .land-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-            margin-bottom: 12px; /* Space between image and text */
-        }
-        .land-title {
-            font-size: 1.5em;
-            margin: 10px 0;
-        }
-        .land-price {
-            font-size: 1.2em;
-            color: #007bff; /* Highlight price with a different color */
-            margin: 10px 0;
-        }
-        .view-docs-btn {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.3s; /* Smooth transition for hover effect */
-        }
-        .view-docs-btn:hover {
-            background-color: #0056b3;
-        }
-        h2 {
-            text-align: left; /* Align section title to the left */
-        }
-        /* Popup styles */
-        .popup {
-            display: none;
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-        }
-        .popup-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            width: 400px;
-            position: relative;
-        }
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            color: #333;
-        }
-    </style>
-</head>
-<body>
-    <nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
-        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
-            <div style="color: white; font-size: 1.5em;">
-                <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
-            </div>
-            <div style="display: flex; gap: 1em;">
-                <% if (locals.user && locals.user.role) { %>
-                    <% if (user.role === 'admin') { %>
-                        <a href="/admin/dashboard" style="color: white; text-decoration: none;">Admin Dashboard</a>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>All Lands - Land Marketplace</title>
+        <link rel="stylesheet" href="/styles/main.css"> <!-- Link to external CSS for styling -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for interactivity -->
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                margin: 0;
+                padding: 20px;
+            }
+            .land-card {
+                perspective: 1000px; /* Enable 3D space for the flip effect */
+                width: 300px;
+                height: 400px;
+                margin: 20px;
+                display: inline-block;
+                vertical-align: top;
+            }
+            .card-inner {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                text-align: center;
+                transition: transform 0.8s;
+                transform-style: preserve-3d;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                cursor: pointer;
+            }
+            .land-card:hover .card-inner {
+                transform: rotateY(180deg);
+            }
+            .card-front, .card-back {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                backface-visibility: hidden;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                background-color: #fff;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            .card-front {
+                /* Front side styles */
+            }
+            .card-back {
+                transform: rotateY(180deg);
+                overflow-y: auto;
+            }
+            .land-image {
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+                border-radius: 4px;
+                margin-bottom: 12px; /* Space between image and text */
+            }
+            .land-title {
+                font-size: 1.5em;
+                margin: 10px 0;
+                color: #333;
+            }
+            .button-group {
+                display: flex;
+                gap: 10px;
+                margin-top: 20px;
+            }
+            .view-docs-btn, .buy-btn {
+                padding: 10px 15px;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                font-size: 1em;
+                flex: 1;
+            }
+            .view-docs-btn:hover {
+                background-color: #0056b3;
+            }
+            .buy-btn {
+                background-color: #28a745;
+            }
+            .buy-btn:hover {
+                background-color: #218838;
+            }
+            .land-details {
+                text-align: left;
+                margin-top: 10px;
+            }
+            .land-details p {
+                margin: 5px 0;
+                word-wrap: break-word; /* Ensure long words break to prevent overflow */
+            }
+            .buy-form {
+                margin-top: 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .transaction-input {
+                width: 100%;
+                padding: 8px 12px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 1em;
+                box-sizing: border-box;
+            }
+            .submit-btn {
+                width: 100%;
+                padding: 10px 20px;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1em;
+                transition: background-color 0.3s;
+            }
+            .submit-btn:hover {
+                background-color: #218838;
+            }
+            .cancel-btn {
+                background-color: #dc3545;
+            }
+            .cancel-btn:hover {
+                background-color: #c82333;
+            }
+            h2 {
+                text-align: left; /* Align section title to the left */
+            }
+            /* Popup styles */
+            .popup {
+                display: none;
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+            .popup-content {
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 500px;
+                position: relative;
+                box-sizing: border-box;
+                max-height: 90%;
+                overflow-y: auto; /* Allow scrolling if content exceeds height */
+            }
+            .close-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                cursor: pointer;
+                font-size: 18px;
+                color: #333;
+            }
+            @media (max-width: 600px) {
+                .land-card {
+                    width: 100%;
+                    height: auto;
+                    margin: 10px 0;
+                }
+                .card-inner {
+                    height: auto;
+                }
+                .land-image {
+                    height: 200px;
+                }
+                .land-title {
+                    font-size: 1.2em;
+                }
+                .view-docs-btn, .buy-btn {
+                    padding: 8px 12px;
+                    font-size: 0.9em;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
+            <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+                <div style="color: white; font-size: 1.5em;">
+                    <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
+                </div>
+                <div style="display: flex; gap: 1em;">
+                    <% if (locals.user && locals.user.role) { %>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin/dashboard" style="color: white; text-decoration: none;">Admin Dashboard</a>
+                        <% } else { %>
+                            <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
+                        <% } %>
+                        <span style="color: white;">Welcome, <%= user.name %></span>
+                        <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
                     <% } else { %>
                         <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
                     <% } %>
-                    <span style="color: white;">Welcome, <%= user.name %></span>
-                    <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
+                </div>
+            </div>
+        </nav>
+        <main>
+            <section class="land-list">
+                <h2>Available Lands</h2>
+                <% if (lands && lands.length > 0) { %>
+                    <div class="land-cards-container" style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
+                        <% lands.forEach(function(land) { %>
+                            <% if (land.aadharId !== user.aadharId) { %> <!-- Check if the land owner Aadhar ID is different from the user's Aadhar ID -->
+                                <div class="land-card" id="card-<%= land.landno %>">
+                                    <div class="card-inner">
+                                        <div class="card-front">
+                                            <% if (land.documents && land.documents.landPicture) { %>
+                                                <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title ? land.title : 'Unnamed Land' %>" class="land-image">
+                                            <% } else { %>
+                                                <img src="/uploads/default-land.png" alt="Default Land Image" class="land-image">
+                                            <% } %>
+                                            <h4 class="land-title"><%= land.title ? land.title : 'Unnamed Land' %></h4>
+                                            <div class="button-group">
+                                                <% if (land.documents && land.documents.propertyDocuments) { %>
+                                                    <a href="/uploads/<%= land.documents.propertyDocuments %>" class="view-docs-btn" target="_blank">View Documents</a>
+                                                <% } else { %>
+                                                    <button class="view-docs-btn" disabled>View Documents</button>
+                                                <% } %>
+                                                <button class="buy-btn" onclick="showPopup('<%= (land.title ? land.title.replace(/'/g, "\\'") : 'Untitled').replace(/"/g, '\\"') %>', '<%= (land.description ? land.description.replace(/'/g, "\\'") : 'No description available.').replace(/"/g, '\\"') %>', '<%= land.price ? land.price : '0' %>', '<%= (land.location ? land.location.replace(/'/g, "\\'") : 'Unknown').replace(/"/g, '\\"') %>', '<%= (land.ownerName ? land.ownerName.replace(/'/g, "\\'") : 'Unknown').replace(/"/g, '\\"') %>', '<%= (land.documents && land.documents.propertyDocuments) ? "/uploads/" + land.documents.propertyDocuments : "" %>', '<%= land.landno %>')">Buy</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-back">
+                                            <div class="land-details">
+                                                <p><strong>Description:</strong> <%= land.description ? land.description : 'No description available.' %></p>
+                                                <p><strong>Price:</strong> $<%= land.price ? land.price.toLocaleString() : '0' %></p>
+                                                <p><strong>Location:</strong> <%= land.location ? land.location : 'Not specified' %></p>
+                                                <p><strong>Area:</strong> <%= land.area ? land.area : 'N/A' %> sq ft</p>
+                                                <p><strong>Status:</strong> <%= land.status ? land.status : 'N/A' %></p>
+                                                <p><strong>Owner:</strong> <%= land.ownerName ? land.ownerName : 'Unknown' %></p>
+                                            </div>
+                                            <form class="buy-form" action="/buy/<%= user.aadharId ? user.aadharId : '' %>/<%= land.landno ? land.landno : '' %>" method="POST" onsubmit="return handleBuySubmit(this);">
+                                                <input type="text" name="transactionId" placeholder="Enter Transaction ID" class="transaction-input" required>
+                                                <button type="submit" class="submit-btn">Confirm Buy</button>
+                                                <button type="button" class="submit-btn cancel-btn" style="margin-top: 10px;" onclick="flipCard('<%= land.landno %>')">Cancel</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% }); %>
+                    </div>
                 <% } else { %>
-                    <a href="/dashboard" style="color: white; text-decoration: none;">dashboard</a>
+                    <p>No available lands found.</p>
                 <% } %>
+            </section>
+        </main>
+    
+        <footer style=" width: 100%; background-color: #333; bottom: 0; position: fixed; color: white; text-align: center; ">
+            <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
+        </footer>
+    
+        <!-- Popup -->
+        <div id="landPopup" class="popup">
+            <div class="popup-content">
+                <span class="close-btn" onclick="closePopup()">&times;</span>
+                <h2 id="popupTitle">Land Title</h2>
+                <p id="popupDescription">Description of the land.</p>
+                <p id="popupPrice">Price: $0</p>
+                <p id="popupLocation">Location: Unknown</p>
+                <p id="popupOwner">Owner: Unknown</p>
+                <div id="popupDocs"></div>
+                <form id="buyForm" class="buy-form" action="" method="POST" onsubmit="return handleBuySubmit(this);">
+                    <input type="text" name="transactionId" placeholder="Enter Transaction ID" class="transaction-input" required>
+                    <button type="submit" class="submit-btn">Buy</button>
+                </form>
             </div>
         </div>
-    </nav>
-    <main>
-        <section class="land-list">
-            <h2>Available Lands</h2>
-            <% if (lands && lands.length > 0) { %>
-                <% lands.forEach(function(land) { %>
-                    <% if (land.aadharId !== user.aadharId) { %> <!-- Check if the land owner Aadhar ID is different from the user's Aadhar ID -->
-                        <div class="land-card">
-                            <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title %>" class="land-image">
-                            <h4 class="land-title"><%= land.title %></h4>
-                            <p><strong>Description:</strong> <%= land.description %></p>
-                            <p><strong>Price:</strong> $<%= land.price %></p>
-                            <p><strong>Location:</strong> <%= land.location %></p>
-                            <p><strong>Area:</strong> <%= land.area %> sq ft</p>
-                            <p><strong>Status:</strong> <%= land.status %></p>
-                            <form id="buyForm" action="/buy/<%= user.aadharId %>/<%= land.landno %>" method="POST">
-                                <input type="text" name="transactionId" placeholder="Enter Transaction ID" required>
-                                <button type="submit" class="btn">Buy</button>
-                            </form>
-                        </div>
-                    <% } %>
-                <% }); %>
-            <% } else { %>
-                <p>No available lands found.</p>
-            <% } %>
-        </section>
-    </main>
+    
+        <script>
+            function showPopup(title, description, price, location, owner, docs, landId) {
+                document.getElementById('popupTitle').innerText = title;
+                document.getElementById('popupDescription').innerText = description;
+                document.getElementById('popupPrice').innerText = 'Price: $' + price;
+                document.getElementById('popupLocation').innerText = 'Location: ' + location;
+                document.getElementById('popupOwner').innerText = 'Owner: ' + owner;
+                document.getElementById('popupDocs').innerHTML = docs ? '<a href="' + docs + '" target="_blank" class="view-docs-btn">View Document</a>' : '';
+                document.getElementById('buyForm').action = '/buy/' + landId + '/buyerAadharId/' + '<%= user.aadharId ? user.aadharId : "" %>'; // Set the form action to the buy route with Aadhar ID
+                document.getElementById('landPopup').style.display = 'flex';
+            }
+    
+            function closePopup() {
+                document.getElementById('landPopup').style.display = 'none';
+            }
+    
+            function handleBuySubmit(form) {
+                // Optionally, you can add any validation or processing here
+                // Redirect to the buyer dashboard after form submission
+                form.action = '/buyer/dashboard'; // Change the action to redirect after submission
+                return true; // Allow the form to submit
+            }
 
-    <footer style=" width: 100%; background-color: #333; bottom: 0; position: fixed; color: white; text-align: center; ">
-        <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
-    </footer>
-
-    <script>
-        function showPopup(title, description, price, location, owner, docs, landId) {
-            document.getElementById('popupTitle').innerText = title;
-            document.getElementById('popupDescription').innerText = description;
-            document.getElementById('popupPrice').innerText = price;
-            document.getElementById('popupLocation').innerText = location;
-            document.getElementById('popupOwner').innerText = owner;
-            document.getElementById('popupDocs').innerHTML = docs ? '<a href="' + docs + '" target="_blank" class="view-docs-btn">View Document</a>' : '';
-            document.getElementById('buyForm').action = '/land/buy/' + landId + '/buyerAadharId/' + user.aadharId; // Set the form action to the buy route with Aadhar ID
-            document.getElementById('landPopup').style.display = 'flex';
-        }
-
-        function closePopup() {
-            document.getElementById('landPopup').style.display = 'none';
-        }
-
-        function handleBuySubmit(form) {
-            // Optionally, you can add any validation or processing here
-            // Redirect to the buyer dashboard after form submission
-            form.action = '/buyer/dashboard'; // Change the action to redirect after submission
-            return true; // Allow the form to submit
-        }
-    </script>
-</body>
-</html>
+            function flipCard(landNo) {
+                var card = document.getElementById('card-' + landNo);
+                if (card.classList.contains('flipped')) {
+                    card.classList.remove('flipped');
+                } else {
+                    card.classList.add('flipped');
+                }
+            }
+        </script>
+    </body>
+    </html>

@@ -1,94 +1,141 @@
-<%- include('includes/header', {title: 'User Dashboard'}) %>
-
-<h2>My Lands</h2>
-
-<!-- Form to Add New Land -->
-<h3>Add New Land</h3>
-<form action="/land/add" method="POST" enctype="multipart/form-data">
-    <input type="text" name="title" placeholder="Title" required><br>
-    <textarea name="description" placeholder="Description" required></textarea><br>
-    <input type="number" name="price" placeholder="Price" required><br>
-    <input type="text" name="location" placeholder="Location" required><br>
-    <input type="number" name="area" placeholder="Area in sq ft" required><br>
-    <input type="text" name="landno" placeholder="Land Number" required><br>
-    <label>Land Picture:</label><br>
-    <input type="file" name="landPicture" accept="image/*" required><br>
-    <label>Property Documents:</label><br>
-    <input type="file" name="propertyDocuments" accept="image/*,.pdf" required><br>
-    <button type="submit">Add Land</button>
-</form>
-
-<!-- Display User's Lands -->
-<% if (myLands && myLands.length > 0) { %>
-    <h3>Your Lands</h3>
-    <% myLands.forEach(function(land) { %>
-        <div class="land-card">
-            <h4 class="land-title"><%= land.title %></h4>
-            <% if (land.documents && land.documents.landPicture) { %>
-                <img src="/uploads/<%= land.documents.landPicture %>" alt="Land Picture" class="land-image" />
-            <% } %>
-            <p>Description: <%= land.description %></p>
-            <p>Price: $<%= land.price.toLocaleString() %></p>
-            <p>Location: <%= land.location %></p>
-            <p>Area: <%= land.area %> sq ft</p>
-            <p>Status: <%= land.status %></p>
-            <p>Owner Aadhar ID: <%= land.aadharId %></p>
-            <% if (land.aadharId === user.aadharId) { %>
-                <p style="color: green;">You are the owner of this land.</p>
-            <% } else { %>
-                <p style="color: red;">You are not the owner of this land.</p>
-            <% } %>
-            <div class="button-group">
-                <% if (land.status === 'owned') { %>
-                    <form action="/land/request-sell/<%= land._id %>" method="POST">
-                        <button type="submit" class="btn">Request to Sell</button>
-                    </form>
-                <% } else if (land.status === 'pending_sale') { %>
-                    <p>Waiting for admin approval to sell</p>
-                <% } %>
-                <% if (land.documents && land.documents.propertyDocuments) { %>
-                    <a href="/uploads/<%= land.documents.propertyDocuments %>" class="btn" target="_blank">View Documents</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Land Marketplace</title>
+    <link rel="stylesheet" href="/styles/main.css"> <!-- Link to external CSS for styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        .land-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            width: 300px; /* Consistent width for all cards */
+            display: inline-block;
+            vertical-align: top;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff; /* White background for cards */
+            cursor: pointer; /* Indicate that the card is clickable */
+            transition: transform 0.2s; /* Smooth scaling effect */
+        }
+        .land-card:hover {
+            transform: scale(1.02); /* Slightly enlarge card on hover */
+        }
+        .land-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 12px; /* Space between image and text */
+        }
+        .btn {
+            background-color: #007bff; /* Blue button */
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between; /* Align buttons to the sides */
+            margin-top: 10px; /* Space above button group */
+        }
+    </style>
+</head>
+<body>
+    <nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+            <div style="color: white; font-size: 1.5em;">
+                <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
+            </div>
+            <div style="display: flex; gap: 1em;">
+                <% if (user && user.role) { %>
+                    <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
+                    <span style="color: white;">Welcome, <%= user.name %></span>
+                    <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
+                <% } else { %>
+                    <a href="/login" style="color: white; text-decoration: none;">Login</a>
+                    <a href="/register" style="color: white; text-decoration: none;">Register</a>
                 <% } %>
             </div>
         </div>
-    <% }); %>
-<% } else { %>
-    <p>No lands added yet.</p>
-<% } %>
+    </nav>
 
-<%- include('includes/footer') %> 
-<style>
-    .land-card {
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 15px;
-        width: 200px; /* Adjust width as needed */
-        display: inline-block;
-        vertical-align: top;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        background-color: #fff; /* White background for cards */
-        transition: transform 0.2s; /* Smooth scaling effect */
-    }
-    .land-card:hover {
-        transform: scale(1.02); /* Slightly enlarge card on hover */
-    }
-    .land-image {
-        width: 100%; /* Make image responsive */
-        height: auto;
-        border-radius: 4px;
-    }
-    .btn {
-        background-color: #28a745; /* Green button */
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        text-align: center;
-        text-decoration: none;
-    }
-    .btn:hover {
-        background-color: #218838; /* Darker green on hover */
-    }
-</style>
+    <h2>My Lands</h2>
+
+    <!-- Form to Add New Land -->
+    <h3>Add New Land</h3>
+    <form action="/land/add" method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Title" required><br>
+        <textarea name="description" placeholder="Description" required></textarea><br>
+        <input type="number" name="price" placeholder="Price" required><br>
+        <input type="text" name="location" placeholder="Location" required><br>
+        <input type="number" name="area" placeholder="Area in sq ft" required><br>
+        <input type="text" name="landno" placeholder="Land Number" required><br>
+        <label>Land Picture:</label><br>
+        <input type="file" name="landPicture" accept="image/*" required><br>
+        <label>Property Documents:</label><br>
+        <input type="file" name="propertyDocuments" accept="image/*,.pdf" required><br>
+        <button type="submit">Add Land</button>
+    </form>
+
+    <!-- Display User's Lands -->
+    <% if (myLands && myLands.length > 0) { %>
+        <h3>Your Lands</h3>
+        <% myLands.forEach(function(land) { %>
+            <div class="land-card">
+                <h4 class="land-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><%= land.title %></span>
+                    <% if (land.documents && land.documents.propertyDocuments) { %>
+                        <a href="/uploads/<%= land.documents.propertyDocuments %>" class="btn" target="_blank">View Documents</a>
+                    <% } %>
+                </h4>
+                <% if (land.documents && land.documents.landPicture) { %>
+                    <img src="/uploads/<%= land.documents.landPicture %>" alt="Land Picture" class="land-image" />
+                <% } %>
+                <p>Description: <%= land.description %></p>
+                <p>Price: $<%= land.price.toLocaleString() %></p>
+                <p>Location: <%= land.location %></p>
+                <p>Area: <%= land.area %> sq ft</p>
+                <p>Status: <%= land.status %></p>
+                <p>Owner Aadhar ID: <%= land.aadharId %></p>
+                <% if (land.aadharId === user.aadharId) { %>
+                    <p style="color: green;">You are the owner of this land.</p>
+                <% } else { %>
+                    <p style="color: red;">You are not the owner of this land.</p>
+                <% } %>
+                <div class="button-group">
+                    <% if (land.status === 'owned') { %>
+                        <!-- <form action="/land/request-sell/<%= land._id %>" method="POST">
+                            <button type="submit" class="btn">Request to Sell</button>
+                        </form> -->
+                    <% } else if (land.status === 'pending_sale') { %>
+                        <p>Waiting for admin approval to sell</p>
+                    <% } %>
+                </div>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <p>No lands added yet.</p>
+    <% } %>
+
+    <footer style=" width: 100%; background-color: #333; color: white; height: 50px; bottom: 0; text-align: center;">
+        <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
+    </footer>
+</body>
+</html>

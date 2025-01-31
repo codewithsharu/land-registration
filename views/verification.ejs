@@ -1,36 +1,100 @@
-<%- include('includes/header', { title: 'Pending Land Verification' }) %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pending Land Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+            <div style="color: white; font-size: 1.5em;">
+                <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
+            </div>
+            <div style="display: flex; gap: 1em;">
+                <% if (user && user.role) { %>
+                    <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
+                    <span style="color: white;">Welcome, <%= user.name %></span>
+                    <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
+                <% } else { %>
+                    <a href="/login" style="color: white; text-decoration: none;">Login</a>
+                    <a href="/register" style="color: white; text-decoration: none;">Register</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
 
-<h2>Pending Land Transactions</h2>
+    <h2>Pending Land Transactions</h2>
 
-<% if (lands && lands.length > 0) { %>
-    <table>
-        <thead>
-            <tr>
-                <th>Land Title</th>
-                <th>Land Number</th>
-                <th>Buyer Aadhar ID</th>
-                <th>Transaction ID</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% lands.forEach(function(land) { %>
+    <% if (lands && lands.length > 0) { %>
+        <table>
+            <thead>
                 <tr>
-                    <td><%= land.title %></td>
-                    <td><%= land.landno %></td>
-                    <td><%= land.buyerAadharId %></td>
-                    <td><%= land.transactionId %></td>
-                    <td>
-                        <form action="/transfer/<%= land.landno %>/<%= land.buyerAadharId %>" method="POST">
-                            <button type="submit" class="btn">Transfer Ownership</button>
-                        </form>
-                    </td>
+                    <th>Land Title</th>
+                    <th>Land Number</th>
+                    <th>Buyer Aadhar ID</th>
+                    <th>Transaction ID</th>
+                    <th>Action</th>
                 </tr>
-            <% }); %>
-        </tbody>
-    </table>
-<% } else { %>
-    <p>No pending land transactions found.</p>
-<% } %>
+            </thead>
+            <tbody>
+                <% lands.forEach(function(land) { %>
+                    <tr>
+                        <td><%= land.title %></td>
+                        <td><%= land.landno %></td>
+                        <td><%= land.buyerAadharId %></td>
+                        <td><%= land.transactionId %></td>
+                        <td>
+                            <form action="/transfer/<%= land.landno %>/<%= land.buyerAadharId %>" method="POST">
+                                <button type="submit" class="btn">Transfer Ownership</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No pending land transactions found.</p>
+    <% } %>
 
-<%- include('includes/footer') %> 
+    <footer style=" width: 100%; background-color: #333;  color: white; height: 50px; bottom: 0; text-align: center;">
+        <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
+    </footer>
+</body>
+</html> 

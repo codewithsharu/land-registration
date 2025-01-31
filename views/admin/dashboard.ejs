@@ -1,113 +1,141 @@
-<%- include('../includes/header', {title: 'Admin Dashboard'}) %>
-
-<style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 20px;
-    }
-    .approval-section {
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        padding: 20px;
-    }
-    h2 {
-        color: #333;
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 10px;
-    }
-    .land-item {
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 15px;
-        margin: 10px 0;
-        background-color: #fafafa;
-        transition: background-color 0.3s;
-    }
-    .land-item:hover {
-        background-color: #f1f1f1;
-    }
-    .land-item h3 {
-        margin: 0 0 10px;
-        color: #007bff;
-    }
-    .button-group {
-        margin-top: 10px;
-    }
-    .btn {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 15px;
-        cursor: pointer;
-        text-decoration: none;
-        transition: background-color 0.3s;
-        margin-right: 10px; /* Add space between buttons */
-    }
-    .btn:hover {
-        background-color: #0056b3;
-    }
-    .land-image {
-        max-width: 100%;
-        height: auto;
-        border-radius: 5px;
-        margin: 10px 0;
-    }
-</style>
-
-<div class="approval-section">
-    <h2>Pending Users</h2>
-    <% if (pendingUsers && pendingUsers.length > 0) { %>
-        <% pendingUsers.forEach(function(user) { %>
-            <div class="land-item">
-                <h3><%= user.name %></h3>
-                <p>Email: <%= user.email %></p>
-                <p>Aadhar ID: <%= user.aadharId %></p>
-                <p>PAN: <%= user.panNumber %></p>
-                <div class="button-group">
-                    <form action="/admin/approve-user/<%= user._id %>" method="POST">
-                        <button type="submit" class="btn">Approve User</button>
-                    </form>
-                    <br>
-                  
-                    <% if (user.documents) { %>
-                        <a href="/uploads/<%= user.documents.aadharCard %>" class="btn" target="_blank">View Aadhar Card</a>
-                        <a href="/uploads/<%= user.documents.panCard %>" class="btn" target="_blank">View PAN Card</a>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .approval-section {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .land-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #fafafa;
+            transition: background-color 0.3s;
+        }
+        .land-item:hover {
+            background-color: #f1f1f1;
+        }
+        .land-item h3 {
+            margin: 0 0 10px;
+            color: #007bff;
+        }
+        .button-group {
+            margin-top: 10px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            margin-right: 10px; /* Add space between buttons */
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .land-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+            <div style="color: white; font-size: 1.5em;">
+                <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
+            </div>
+            <div style="display: flex; gap: 1em;">
+                <% if (user && user.role) { %>
+                    <% if (user.role === 'admin') { %>
+                        <a href="/admin/dashboard" style="color: white; text-decoration: none;">Admin Dashboard</a>
+                    <% } else { %>
+                        <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
                     <% } %>
-                </div>
-            </div>
-        <% }); %>
-    <% } else { %>
-        <p>No pending users</p>
-    <% } %>
-</div>
-
-<div class="approval-section">
-    <h2>Pending Land Sale Requests</h2>
-    <% if (pendingSales && pendingSales.length > 0) { %>
-        <% pendingSales.forEach(function(land) { %>
-            <div class="land-item">
-                <h3><%= land.title %></h3>
-                <% if (land.documents && land.documents.landPicture) { %>
-                    <img src="/uploads/<%= land.documents.landPicture.split('/').pop() %>" 
-                         alt="Land Picture" 
-                         class="land-image">
+                    <span style="color: white;">Welcome, <%= user.name %></span>
+                    <a href="/logout" style="color: white; text-decoration: none;">Logout</a>
+                <% } else { %>
+                    <a href="/login" style="color: white; text-decoration: none;">Login</a>
+                    <a href="/register" style="color: white; text-decoration: none;">Register</a>
                 <% } %>
-                <p>Price: $<%= land.price.toLocaleString() %></p>
-                <p>Location: <%= land.location %></p>
-                <p>Area: <%= land.area %> sq ft</p>
-                <form action="/admin/approve-sale/<%= land._id %>" method="POST">
-                    <button type="submit" class="btn">Approve Sale Listing</button>
-                </form>
             </div>
-        <% }); %>
-    <% } else { %>
-        <p>No pending sale requests</p>
-    <% } %>
-</div>
+        </div>
+    </nav>
 
-<%- include('../includes/footer') %> 
+    <div class="approval-section">
+        <h2>Pending Users</h2>
+        <% if (pendingUsers && pendingUsers.length > 0) { %>
+            <% pendingUsers.forEach(function(user) { %>
+                <div class="land-item">
+                    <h3><%= user.name %></h3>
+                    <p>Email: <%= user.email %></p>
+                    <p>Aadhar ID: <%= user.aadharId %></p>
+                    <p>PAN: <%= user.panNumber %></p>
+                    <div class="button-group">
+                        <form action="/admin/approve-user/<%= user._id %>" method="POST">
+                            <button type="submit" class="btn">Approve User</button>
+                        </form>
+                        <br>
+                        <% if (user.documents) { %>
+                            <a href="/uploads/<%= user.documents.aadharCard %>" class="btn" target="_blank">View Aadhar Card</a>
+                            <a href="/uploads/<%= user.documents.panCard %>" class="btn" target="_blank">View PAN Card</a>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p>No pending users</p>
+        <% } %>
+    </div>
+
+    <div class="approval-section">
+        <h2>Pending Land Sale Requests</h2>
+        <% if (pendingSales && pendingSales.length > 0) { %>
+            <% pendingSales.forEach(function(land) { %>
+                <div class="land-item">
+                    <h3><%= land.title %></h3>
+                    <% if (land.documents && land.documents.landPicture) { %>
+                        <img src="/uploads/<%= land.documents.landPicture.split('/').pop() %>" 
+                             alt="Land Picture" 
+                             class="land-image">
+                    <% } %>
+                    <p>Price: $<%= land.price.toLocaleString() %></p>
+                    <p>Location: <%= land.location %></p>
+                    <p>Area: <%= land.area %> sq ft</p>
+                    <form action="/admin/approve-sale/<%= land._id %>" method="POST">
+                        <button type="submit" class="btn">Approve Sale Listing</button>
+                    </form>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p>No pending sale requests</p>
+        <% } %>
+    </div>
+
+    <footer style=" width: 100%; background-color: #333;  color: white; height: 50px; bottom: 0; text-align: center;">
+        <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
+    </footer>
+</body>
+</html> 
