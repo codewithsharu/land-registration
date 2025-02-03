@@ -14,48 +14,16 @@
                 padding: 20px;
             }
             .land-card {
-                perspective: 1000px; /* Enable 3D space for the flip effect */
                 width: 300px;
-                height: 400px;
+                height: auto;
                 margin: 20px;
                 display: inline-block;
                 vertical-align: top;
-            }
-            .card-inner {
-                position: relative;
-                width: 100%;
-                height: 100%;
-                text-align: center;
-                transition: transform 0.8s;
-                transform-style: preserve-3d;
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                 border-radius: 8px;
-                cursor: pointer;
-            }
-            .land-card:hov .card-inner {
-                transform: rotateY(180deg);
-            }
-            .card-front, .card-back {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                backface-visibility: hidden;
-                border: 1px solid #ccc;
-                border-radius: 8px;
                 background-color: #fff;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
                 padding: 20px;
                 box-sizing: border-box;
-            }
-            .card-front {
-                /* Front side styles */
-            }
-            .card-back {
-                transform: rotateY(180deg);
-                overflow-y: auto;
             }
             .land-image {
                 width: 100%;
@@ -141,46 +109,11 @@
             h2 {
                 text-align: left; /* Align section title to the left */
             }
-            /* Popup styles */
-            .popup {
-                display: none;
-                position: fixed;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.7);
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            }
-            .popup-content {
-                background-color: #fff;
-                padding: 20px;
-                border-radius: 8px;
-                width: 90%;
-                max-width: 500px;
-                position: relative;
-                box-sizing: border-box;
-                max-height: 90%;
-                overflow-y: auto; /* Allow scrolling if content exceeds height */
-            }
-            .close-btn {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                cursor: pointer;
-                font-size: 18px;
-                color: #333;
-            }
             @media (max-width: 600px) {
                 .land-card {
                     width: 100%;
                     height: auto;
                     margin: 10px 0;
-                }
-                .card-inner {
-                    height: auto;
                 }
                 .land-image {
                     height: 200px;
@@ -224,39 +157,32 @@
                         <% lands.forEach(function(land) { %>
                             <% if (land.aadharId !== user.aadharId) { %> <!-- Check if the land owner Aadhar ID is different from the user's Aadhar ID -->
                                 <div class="land-card" id="card-<%= land.landno %>">
-                                    <div class="card-inner">
-                                        <div class="card-front">
-                                            <% if (land.documents && land.documents.landPicture) { %>
-                                                <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title ? land.title : 'Unnamed Land' %>" class="land-image">
-                                            <% } else { %>
-                                                <img src="/uploads/default-land.png" alt="Default Land Image" class="land-image">
-                                            <% } %>
-                                            <h4 class="land-title"><%= land.title ? land.title : 'Unnamed Land' %></h4>
-                                            <div class="button-group">
-                                                <% if (land.documents && land.documents.propertyDocuments) { %>
-                                                    <a href="/uploads/<%= land.documents.propertyDocuments %>" class="view-docs-btn" target="_blank">View Documents</a>
-                                                <% } else { %>
-                                                    <button class="view-docs-btn" disabled>View Documents</button>
-                                                <% } %>
-                                                <button class="buy-btn" onclick="showPopup('<%= (land.title ? land.title.replace(/'/g, "\\'") : 'Untitled').replace(/"/g, '\\"') %>', '<%= (land.description ? land.description.replace(/'/g, "\\'") : 'No description available.').replace(/"/g, '\\"') %>', '<%= land.price ? land.price : '0' %>', '<%= (land.location ? land.location.replace(/'/g, "\\'") : 'Unknown').replace(/"/g, '\\"') %>', '<%= (land.ownerName ? land.ownerName.replace(/'/g, "\\'") : 'Unknown').replace(/"/g, '\\"') %>', '<%= (land.documents && land.documents.propertyDocuments) ? "/uploads/" + land.documents.propertyDocuments : "" %>', '<%= land.landno %>')">Buy</button>
-                                            </div>
-                                        </div>
-                                        <div class="card-back">
-                                            <div class="land-details">
-                                                <p><strong>Description:</strong> <%= land.description ? land.description : 'No description available.' %></p>
-                                                <p><strong>Price:</strong> $<%= land.price ? land.price.toLocaleString() : '0' %></p>
-                                                <p><strong>Location:</strong> <%= land.location ? land.location : 'Not specified' %></p>
-                                                <p><strong>Area:</strong> <%= land.area ? land.area : 'N/A' %> sq ft</p>
-                                                <p><strong>Status:</strong> <%= land.status ? land.status : 'N/A' %></p>
-                                                <p><strong>Owner:</strong> <%= land.ownerName ? land.ownerName : 'Unknown' %></p>
-                                            </div>
-                                            <form class="buy-form" action="/buy/<%= user.aadharId ? user.aadharId : '' %>/<%= land.landno ? land.landno : '' %>" method="POST" onsubmit="return handleBuySubmit(this);">
-                                                <input type="text" name="transactionId" placeholder="Enter Transaction ID" class="transaction-input" required>
-                                                <button type="submit" class="submit-btn">Confirm Buy</button>
-                                                <button type="button" class="submit-btn cancel-btn" style="margin-top: 10px;" onclick="flipCard('<%= land.landno %>')">Cancel</button>
-                                            </form>
-                                        </div>
+                                    <% if (land.documents && land.documents.landPicture) { %>
+                                        <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title ? land.title : 'Unnamed Land' %>" class="land-image">
+                                    <% } else { %>
+                                        <img src="/uploads/default-land.png" alt="Default Land Image" class="land-image">
+                                    <% } %>
+                                    <h4 class="land-title"><%= land.title ? land.title : 'Unnamed Land' %></h4>
+                                    <div class="button-group">
+                                        <% if (land.documents && land.documents.propertyDocuments) { %>
+                                            <a href="/uploads/<%= land.documents.propertyDocuments %>" class="view-docs-btn" target="_blank">View Documents</a>
+                                        <% } else { %>
+                                            <button class="view-docs-btn" disabled>View Documents</button>
+                                        <% } %>
                                     </div>
+                                    <div class="land-details">
+                                        <p><strong>Description:</strong> <%= land.description ? land.description : 'No description available.' %></p>
+                                        <p><strong>Price:</strong> $<%= land.price ? land.price.toLocaleString() : '0' %></p>
+                                        <p><strong>Location:</strong> <%= land.location ? land.location : 'Not specified' %></p>
+                                        <p><strong>Area:</strong> <%= land.area ? land.area : 'N/A' %> sq ft</p>
+                                        <p><strong>Status:</strong> <%= land.status ? land.status : 'N/A' %></p>
+                                        <p><strong>Owner:</strong> <%= land.ownerName ? land.ownerName : 'Unknown' %></p>
+                                    </div>
+                                    <form class="buy-form" action="/buy/<%= user.aadharId ? user.aadharId : '' %>/<%= land.landno ? land.landno : '' %>" method="POST">
+                                        <input type="text" name="transactionId" placeholder="Enter Transaction ID" class="transaction-input" required>
+                                        <input type="text" name="buyerAadharId" value="<%= user.aadharId ? user.aadharId : '' %>" hidden>
+                                        <button type="submit" class="submit-btn">Buy</button>
+                                    </form>
                                 </div>
                             <% } %>
                         <% }); %>
@@ -270,55 +196,5 @@
         <footer style=" width: 100%; background-color: #333; bottom: 0; position: fixed; color: white; text-align: center; ">
             <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
         </footer>
-    
-        <!-- Popup -->
-        <div id="landPopup" class="popup">
-            <div class="popup-content">
-                <span class="close-btn" onclick="closePopup()">&times;</span>
-                <h2 id="popupTitle">Land Title</h2>
-                <p id="popupDescription">Description of the land.</p>
-                <p id="popupPrice">Price: $0</p>
-                <p id="popupLocation">Location: Unknown</p>
-                <p id="popupOwner">Owner: Unknown</p>
-                <div id="popupDocs"></div>
-                <form id="buyForm" class="buy-form" action="" method="POST" onsubmit="return handleBuySubmit(this);">
-                    <input type="text" name="transactionId" placeholder="Enter Transaction ID" class="transaction-input" required>
-                    <button type="submit" class="submit-btn">Buy</button>
-                </form>
-            </div>
-        </div>
-    
-        <script>
-            function showPopup(title, description, price, location, owner, docs, landId) {
-                document.getElementById('popupTitle').innerText = title;
-                document.getElementById('popupDescription').innerText = description;
-                document.getElementById('popupPrice').innerText = 'Price: $' + price;
-                document.getElementById('popupLocation').innerText = 'Location: ' + location;
-                document.getElementById('popupOwner').innerText = 'Owner: ' + owner;
-                document.getElementById('popupDocs').innerHTML = docs ? '<a href="' + docs + '" target="_blank" class="view-docs-btn">View Document</a>' : '';
-                document.getElementById('buyForm').action = '/buy/' + landId + '/buyerAadharId/' + '<%= user.aadharId ? user.aadharId : "" %>'; // Set the form action to the buy route with Aadhar ID
-                document.getElementById('landPopup').style.display = 'flex';
-            }
-    
-            function closePopup() {
-                document.getElementById('landPopup').style.display = 'none';
-            }
-    
-            function handleBuySubmit(form) {
-                // Optionally, you can add any validation or processing here
-                // Redirect to the buyer dashboard after form submission
-                form.action = '/buyer/dashboard'; // Change the action to redirect after submission
-                return true; // Allow the form to submit
-            }
-
-            function flipCard(landNo) {
-                var card = document.getElementById('card-' + landNo);
-                if (card.classList.contains('flipped')) {
-                    card.classList.remove('flipped');
-                } else {
-                    card.classList.add('flipped');
-                }
-            }
-        </script>
     </body>
     </html>
