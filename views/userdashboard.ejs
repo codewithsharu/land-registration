@@ -4,66 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - Land Marketplace</title>
-    <link rel="stylesheet" href="/styles/main.css"> <!-- Link to external CSS for styling -->
+    <link rel="stylesheet" href="/styles/main.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
         }
-        h2 {
+        h2, h3 {
             color: #333;
         }
         .land-card {
             border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px;
-            width: 300px; /* Consistent width for all cards */
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px;
+            width: 400px;
             display: inline-block;
             vertical-align: top;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            background-color: #fff; /* White background for cards */
-            cursor: pointer; /* Indicate that the card is clickable */
-            transition: transform 0.2s; /* Smooth scaling effect */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
         .land-card:hover {
-            transform: scale(1.02); /* Slightly enlarge card on hover */
+            transform: scale(1.02);
+        }
+        .land-image-container {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            position: relative;
+            border-radius: 4px;
+            margin-bottom: 10px;
         }
         .land-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-            margin-bottom: 12px; /* Space between image and text */
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
         .btn {
-            background-color: #007bff; /* Blue button */
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 8px;
+            border-radius: 4px;
             cursor: pointer;
             text-align: center;
             text-decoration: none;
         }
         .btn:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+            background-color: #0056b3;
         }
         .button-group {
             display: flex;
-            justify-content: space-between; /* Align buttons to the sides */
-            margin-top: 10px; /* Space above button group */
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .form-container input, .form-container textarea, .form-container button {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-container button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #218838;
+        }
+        footer {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            height: 40px;
+            bottom: 0;
+            text-align: center;
+            padding: 8px 0;
         }
     </style>
 </head>
 <body>
-    <nav style="background-color: #333; padding: 1em; margin-bottom: 2em;">
-        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
-            <div style="color: white; font-size: 1.5em;">
+    <nav style="background-color: #333; padding: 0.8em; margin-bottom: 1.5em;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto;">
+            <div style="color: white; font-size: 1.3em;">
                 <a href="/" style="color: white; text-decoration: none;">Land Marketplace</a>
             </div>
-            <div style="display: flex; gap: 1em;">
+            <div style="display: flex; gap: 0.8em;">
                 <% if (user && user.role) { %>
                     <a href="/dashboard" style="color: white; text-decoration: none;">Dashboard</a>
                     <span style="color: white;">Welcome, <%= user.name %></span>
@@ -79,20 +125,22 @@
     <h2>My Lands</h2>
 
     <!-- Form to Add New Land -->
-    <h3>Add New Land</h3>
-    <form action="/land/add" method="POST" enctype="multipart/form-data">
-        <input type="text" name="title" placeholder="Title" required><br>
-        <textarea name="description" placeholder="Description" required></textarea><br>
-        <input type="number" name="price" placeholder="Price" required><br>
-        <input type="text" name="location" placeholder="Location" required><br>
-        <input type="number" name="area" placeholder="Area in sq ft" required><br>
-        <input type="text" name="landno" placeholder="Land Number" required><br>
-        <label>Land Picture:</label><br>
-        <input type="file" name="landPicture" accept="image/*" required><br>
-        <label>Property Documents:</label><br>
-        <input type="file" name="propertyDocuments" accept="image/*,.pdf" required><br>
-        <button type="submit">Add Land</button>
-    </form>
+    <div class="form-container">
+        <h3>Add New Land</h3>
+        <form action="/land/add" method="POST" enctype="multipart/form-data">
+            <input type="text" name="title" placeholder="Title" required><br>
+            <textarea name="description" placeholder="Description" required></textarea><br>
+            <input type="number" name="price" placeholder="Price" required><br>
+            <input type="text" name="location" placeholder="Location" required><br>
+            <input type="number" name="area" placeholder="Area in sq ft" required><br>
+            <input type="text" name="landno" placeholder="Land Number" required><br>
+            <label>Land Picture:</label><br>
+            <input type="file" name="landPicture" accept="image/*" required><br>
+            <label>Property Documents:</label><br>
+            <input type="file" name="propertyDocuments" accept="image/*,.pdf" required><br>
+            <button type="submit">Add Land</button>
+        </form>
+    </div>
 
     <!-- Display User's Lands -->
     <% if (myLands && myLands.length > 0) { %>
@@ -106,7 +154,9 @@
                     <% } %>
                 </h4>
                 <% if (land.documents && land.documents.landPicture) { %>
-                    <img src="/uploads/<%= land.documents.landPicture %>" alt="Land Picture" class="land-image" />
+                    <div class="land-image-container">
+                        <img src="/uploads/<%= land.documents.landPicture %>" alt="Land Picture" class="land-image" />
+                    </div>
                 <% } %>
                 <p>Description: <%= land.description %></p>
                 <p>Price: $<%= land.price.toLocaleString() %></p>
@@ -134,7 +184,7 @@
         <p>No lands added yet.</p>
     <% } %>
 
-    <footer style=" width: 100%; background-color: #333; color: white; height: 50px; bottom: 0; text-align: center;">
+    <footer>
         <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
     </footer>
 </body>
