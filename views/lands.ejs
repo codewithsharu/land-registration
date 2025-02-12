@@ -155,7 +155,7 @@
                 <% if (lands && lands.length > 0) { %>
                     <div class="land-cards-container" style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
                         <% lands.forEach(function(land) { %>
-                            <% if (land.aadharId !== user.aadharId) { %> <!-- Check if the land owner Aadhar ID is different from the user's Aadhar ID -->
+                            <% if (land.aadharId !== user.aadharId && land.approved === true) { %> <!-- Check if the land owner Aadhar ID is different from the user's Aadhar ID and land is approved -->
                                 <div class="land-card" id="card-<%= land.landno %>">
                                     <% if (land.documents && land.documents.landPicture) { %>
                                         <img src="/uploads/<%= land.documents.landPicture %>" alt="<%= land.title ? land.title : 'Unnamed Land' %>" class="land-image">

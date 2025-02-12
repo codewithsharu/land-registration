@@ -373,6 +373,27 @@ app.get('/verification', isAuthenticated, async (req, res) => {
     }
 });
 
+app.get('/approve-land', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const lands = await Land.find();
+        res.render('admin/approve-land', { lands, user: req.session.user });
+    } catch (error) {
+        console.error('Error fetching lands for approval:', error);
+        res.status(500).send('Error fetching lands for approval');
+    }
+});
+
+app.post('/approve-land/:landno', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const landno = req.params.landno;
+        await Land.findOneAndUpdate({ landno }, { approved: true });
+        res.redirect('/approve-land');
+    } catch (error) {
+        console.error('Error approving land:', error);
+        res.status(500).send('Error approving land');
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 }); 

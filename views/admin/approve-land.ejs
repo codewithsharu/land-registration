@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approve Lands - Land Marketplace</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        nav {
+            background-color: #333;
+            padding: 1em;
+            margin-bottom: 2em;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .doc-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .property-doc-btn {
+            background-color: #6c5ce7;
+        }
+
+        .property-doc-btn:hover {
+            background-color: #5f4dd1;
+        }
+
+        .image-doc-btn {
+            background-color: #00b894;
+        }
+
+        .image-doc-btn:hover {
+            background-color: #00a382;
+        }
+
+        .approve-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .approve-btn:hover {
+            background-color: #218838;
+        }
+
+        .approved-span {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .no-docs {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1em;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+            <div style="color: white; font-size: 1.5em;">
+                <a href="/">Land Marketplace</a>
+            </div>
+            <div style="display: flex; gap: 1em;">
+                <a href="/admin/dashboard">Admin Dashboard</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <h2>Approve Lands</h2>
+        <% if (lands && lands.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Documents</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% lands.forEach(function(land) { %>
+                        <tr>
+                            <td><%= land.title %></td>
+                            <td><%= land.description %></td>
+                            <td>$<%= land.price.toLocaleString() %></td>
+                            <td>
+                                <% if (land.documents && land.documents.propertyDocuments) { %>
+                                    <a href="/uploads/<%= land.documents.propertyDocuments %>" target="_blank" class="doc-btn property-doc-btn">
+                                        <i class="fas fa-file-alt"></i> Property Docs
+                                    </a>
+                                <% } else { %>
+                                    <span class="no-docs">
+                                        <i class="fas fa-file-alt"></i> No Property Docs
+                                    </span>
+                                <% } %>
+                                <% if (land.documents && land.documents.landPicture) { %>
+                                    <a href="/uploads/<%= land.documents.landPicture %>" target="_blank" class="doc-btn image-doc-btn">
+                                        <i class="fas fa-image"></i> Land Image
+                                    </a>
+                                <% } else { %>
+                                    <span class="no-docs">
+                                        <i class="fas fa-image"></i> No Land Image
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (!land.approved) { %>
+                                    <form action="/approve-land/<%= land.landno %>" method="POST">
+                                        <button type="submit" class="approve-btn">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                <% } else { %>
+                                    <span class="approved-span">✓ Approved</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div style="text-align: center; padding: 40px; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+                <p style="color: #666; font-size: 1.2em;">No lands available for approval.</p>
+            </div>
+        <% } %>
+    </main>
+    <footer>
+        <p>&copy; 2024 Land Marketplace. All rights reserved.</p>
+    </footer>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</body>
+</html>
