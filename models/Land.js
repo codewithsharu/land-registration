@@ -21,6 +21,7 @@ const landSchema = new mongoose.Schema({
     transactionId: { type: String }, // New field for transaction ID
     buyingStatus: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' }, // New field for buying status
     approved: { type: Boolean, default: false }, // New field for approval status
+    rejectedstatus: { type: Boolean, default: false }, // New field for rejection status
     createdAt: { type: Date, default: Date.now }
 });
 

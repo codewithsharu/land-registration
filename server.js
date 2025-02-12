@@ -394,6 +394,17 @@ app.post('/approve-land/:landno', isAuthenticated, isAdmin, async (req, res) => 
     }
 });
 
+app.post('/reject-land/:landno', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const landno = req.params.landno;
+        await Land.findOneAndUpdate({ landno }, { rejectedstatus: true });
+        res.redirect('/approve-land');
+    } catch (error) {
+        console.error('Error rejecting land:', error);
+        res.status(500).send('Error rejecting land');
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 }); 
